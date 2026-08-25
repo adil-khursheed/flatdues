@@ -6,6 +6,8 @@
 - Expo Router owns navigation. SDK 56 application code imports navigation APIs from `expo-router`, not external `@react-navigation/*` packages.
 - TypeScript stays in strict mode and all application imports may use the existing `@/*` alias.
 - Existing Expo-compatible packages are retained. No additional UI framework is required for the design system.
+- Hugeicons is the only in-app icon system. Use `@hugeicons/react-native` with named icons from `@hugeicons/core-free-icons`; do not introduce Expo Symbols, vector-icon packs, emoji glyphs, or one-off SVG icons for interface actions.
+- `@gorhom/bottom-sheet` is the only modal-overlay primitive. Do not import or render React Native `Modal`, Expo UI BottomSheet, or another sheet/modal library for application flows.
 - Windows can build and bundle Android locally, but an iOS simulator/build requires macOS or EAS Build.
 - Financial totals are derived from expenses, immutable expense splits, and settlements; they are never stored as mutable balance or spending counters.
 - Supabase RLS and authorized RPCs are the security boundary. Client-side role checks are presentation only.
@@ -16,7 +18,7 @@
 src/
   app/                  Expo Router route files and navigation layouts
   components/
-    ui/                 Reusable, domain-neutral design primitives
+    ui/                 Reusable design primitives, AppIcon, and AppBottomSheet
   features/
     auth/               Authentication and session lifecycle
     workspaces/         Workspace selection, creation, and joining
@@ -62,6 +64,27 @@ Important financial mutations wait for server confirmation before invalidation. 
 The design system uses React Native primitives, semantic theme tokens, and the device color scheme. Components must keep a minimum 44-point touch target, expose accessibility state, support text scaling, and never communicate balance state through color alone.
 
 UI primitives remain domain-neutral. Formatting a value is allowed in `MoneyText`; calculating balances, splits, spending, or budgets belongs to feature or database logic.
+
+### Icon system
+
+- Install `@hugeicons/react-native`, `@hugeicons/core-free-icons`, and its required `react-native-svg` peer using Expo-compatible versions.
+- Render interface icons through a shared `AppIcon` primitive. The wrapper owns semantic sizes, theme colors, the default stroke width, and decorative/accessibility behavior.
+- Import only the individual icons a screen needs from `@hugeicons/core-free-icons`. Wildcard imports are prohibited because they prevent effective tree-shaking.
+- Use Hugeicons for tab icons, navigation actions, buttons, inputs, empty/error states, settings rows, categories, filters, member actions, budget actions, expense actions, settlement actions, and all other interface iconography.
+- Meaningful icon-only controls require an accessible label on their enclosing pressable. Decorative icons are hidden from the accessibility tree when adjacent text already provides the label.
+- App icon, splash art, member avatars, and user-supplied images are branded/content imagery rather than interface icons and are not replaced by Hugeicons.
+- If a licensed Hugeicons Pro pack is adopted later, change the icon imports/registry behind `AppIcon`; feature components must not depend directly on a Pro package.
+
+### Bottom-sheet overlays
+
+- Wrap the application root in `GestureHandlerRootView` and `BottomSheetModalProvider` before any sheet is presented.
+- Build a shared `AppBottomSheetModal` abstraction over `@gorhom/bottom-sheet`. It owns the themed background, handle, backdrop, safe-area insets, pan-down dismissal, Android back behavior, reduced-motion behavior where supported, and consistent snap-point conventions.
+- Use `BottomSheetView`, `BottomSheetScrollView`, `BottomSheetFlatList`, and `BottomSheetTextInput` for sheet content instead of equivalent plain components when Gorhom integration affects gestures, scrolling, or keyboard behavior.
+- Use sheets for modal-style pickers, filters, short action menus, confirmations, member/category/date selection, and compact forms. Multi-step or deep-linkable destinations remain Expo Router stack screens.
+- Add Expense may remain a full-screen route for speed and keyboard space; any modal sub-flow inside it uses the shared Gorhom sheet.
+- Destructive confirmations use a confirmation sheet with explicit cancel and destructive actions. Do not fall back to React Native `Modal` or a custom absolute-positioned overlay.
+- Keep sheet state local to the owning feature where possible. Avoid nested sheets and global imperative registries unless a documented cross-feature use case requires them.
+- The native share sheet invoked through React Native's `Share` API is an operating-system capability and is not replaced by Gorhom.
 
 ## Data and authorization boundaries
 

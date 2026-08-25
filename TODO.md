@@ -16,6 +16,8 @@ This file is the implementation tracker for the Flatdues production-quality MVP 
 - [x] Confirm TypeScript strict mode and the `@/*` source alias are enabled.
 - [x] Confirm the app is currently a minimal starter with only a root stack and placeholder index screen.
 - [x] Confirm `expo-secure-store` and a custom `flatdues` URL scheme are already configured.
+- [x] Confirm `@gorhom/bottom-sheet`, React Native Gesture Handler, Reanimated, and Worklets are already installed.
+- [x] Confirm Hugeicons and its `react-native-svg` peer are not installed yet.
 - [x] Confirm Supabase and application testing dependencies are not installed yet.
 - [x] Confirm the repository has pre-existing uncommitted changes that must be preserved.
 - [x] Record that `reset-project` still exists in `package.json` although `scripts/reset-project.js` is deleted.
@@ -59,6 +61,35 @@ This file is the implementation tracker for the Flatdues production-quality MVP 
 - [x] Implement `SectionHeader`.
 - [x] Verify generous spacing, readable amounts, rounded components, accessible contrast, and at least 44×44 touch targets.
 
+### Feature: Hugeicons icon system
+
+- [ ] Install `@hugeicons/react-native` and `@hugeicons/core-free-icons`.
+- [ ] Install `react-native-svg` through Expo so the Hugeicons peer uses an SDK 56-compatible version.
+- [ ] Implement a shared `AppIcon` wrapper with semantic sizes, theme colors, and a consistent default stroke width.
+- [ ] Define typed, centralized icon mappings for tabs, settings, categories, activity, and repeated actions where mappings improve consistency.
+- [ ] Import only named icons from `@hugeicons/core-free-icons`; prohibit wildcard icon imports.
+- [ ] Add optional leading/trailing Hugeicons support to `Button` and icon slots to other relevant primitives.
+- [ ] Use Hugeicons for every interface icon, including navigation, actions, inputs, filters, empty/error states, categories, settings, expenses, budgets, members, and settlements.
+- [ ] Keep app/splash branding, avatars, and content images outside the interface-icon rule.
+- [ ] Give meaningful icon-only controls accessible labels and hide decorative icons from the accessibility tree.
+- [ ] Remove or avoid Expo Symbols, vector-icon libraries, emoji glyphs, and one-off SVG interface icons.
+- [ ] Verify unused Hugeicons remain tree-shakeable and do not create an excessive production bundle increase.
+
+### Feature: Gorhom bottom-sheet foundation
+
+- [ ] Wrap the application root with `GestureHandlerRootView`.
+- [ ] Add `BottomSheetModalProvider` at the application provider boundary.
+- [ ] Implement a reusable, typed `AppBottomSheetModal` over `@gorhom/bottom-sheet`.
+- [ ] Centralize themed background, handle, backdrop, safe-area inset, snap-point, and pan-down-to-close behavior.
+- [ ] Support keyboard-safe form content with `BottomSheetTextInput` and the appropriate keyboard behavior.
+- [ ] Support scrollable/list sheet content through Gorhom's integrated scroll components.
+- [ ] Handle Android back dismissal and screen-reader focus/announcements correctly.
+- [ ] Use Gorhom sheets for all modal-style pickers, filters, short actions, confirmations, and compact forms.
+- [ ] Keep multi-step or deep-linkable destinations as Expo Router stack screens.
+- [ ] Prohibit application imports of React Native `Modal`, Expo UI BottomSheet, other sheet/modal libraries, and custom absolute-positioned modal overlays.
+- [ ] Use a Gorhom confirmation sheet for destructive actions instead of React Native `Modal` or `Alert`-style application confirmations.
+- [ ] Document that the operating-system share sheet through `Share` remains allowed.
+
 ### Phase 1 verification
 
 - [x] TypeScript passes.
@@ -70,6 +101,7 @@ Phase 1 verification notes:
 - [x] `pnpm check` passes after the Phase 1 implementation.
 - [x] Expo SDK dependency compatibility check reports all dependencies up to date.
 - [x] Production export completes for Android, iOS, and web; the web root is statically rendered with expected content.
+- [ ] Production export completes after the Hugeicons and Gorhom provider foundations are implemented.
 - [ ] Interactive Android/iOS rendering remains to be checked on a connected device or simulator; this Windows host has no available emulator and cannot run an iOS simulator.
 - The pre-change TypeScript baseline passed. The pre-change lint command could not run because ESLint was not configured; Phase 1 added the Expo SDK 56 flat configuration and compatible dependencies.
 - The pre-change app itself was not launched before source changes, so that historical baseline item remains intentionally unchecked.
@@ -252,6 +284,7 @@ Phase 1 verification notes:
 ### Feature: Login and signup UI
 
 - [ ] Build the email authentication screen.
+- [ ] Use Hugeicons for meaningful authentication input/action iconography through `AppIcon`.
 - [ ] Validate email and password/OTP inputs inline.
 - [ ] Show submission loading and prevent duplicate requests.
 - [ ] Translate Supabase authentication errors into understandable user messages.
@@ -278,6 +311,7 @@ Phase 1 verification notes:
 ### Feature: Workspace onboarding
 
 - [ ] Build the onboarding choice screen with Create Workspace and Join Workspace actions.
+- [ ] Use Hugeicons consistently for Create Workspace, Join Workspace, copy, and share actions.
 - [ ] Add suitable loading, error, and signed-in user context states.
 - [ ] Prevent entry when the user is not authenticated.
 
@@ -316,6 +350,7 @@ Phase 1 verification notes:
 ### Feature: Members list
 
 - [ ] Show name, avatar/initial, role, and active/inactive status for each member.
+- [ ] Use Hugeicons for role/status indicators and member actions without replacing member avatars.
 - [ ] Avoid N+1 profile fetching.
 - [ ] Show a useful empty/single-member state.
 - [ ] Restrict management controls in the UI while relying on database authorization for enforcement.
@@ -325,6 +360,7 @@ Phase 1 verification notes:
 - [ ] Allow admins to generate an invitation with safe defaults.
 - [ ] Display and copy the invite code.
 - [ ] Share the invite through the native share sheet.
+- [ ] Present invite configuration and short invite actions through `AppBottomSheetModal` where an overlay is appropriate.
 - [ ] Show expiry and remaining-use information when configured.
 - [ ] Allow admins to revoke an active invitation.
 - [ ] Show loading, success, and friendly failure feedback.
@@ -336,6 +372,7 @@ Phase 1 verification notes:
 - [ ] Optionally support promotion to admin if it can be implemented safely within MVP scope.
 - [ ] Prevent unsafe demotion/deactivation of the last active admin.
 - [ ] Decide and enforce whether users can leave a workspace themselves.
+- [ ] Present role/status actions and deactivation confirmation through Gorhom bottom sheets.
 
 ### Phase 6 verification
 
@@ -369,6 +406,9 @@ Phase 1 verification notes:
 - [ ] Keep the common path fast: amount, description, Add Expense.
 - [ ] Allow any active member to be selected as payer.
 - [ ] Allow participant selection/deselection and technically allow payer outside participants.
+- [ ] Use Gorhom bottom sheets for category, date, payer, and participant selection instead of React Native modals.
+- [ ] Use Hugeicons for category choices and expense-form actions through the shared icon system.
+- [ ] Use Gorhom-integrated list, scroll, and text-input components inside selector sheets where required.
 - [ ] Prevent zero selected participants.
 - [ ] Validate required title, payer, amount, positive amount, and participants inline.
 - [ ] Show an approximate per-person share before saving.
@@ -383,6 +423,7 @@ Phase 1 verification notes:
 - [ ] Choose a clean prominent action compatible with the final tab/stack structure.
 - [ ] Make Add Expense reachable with one obvious interaction from Home.
 - [ ] Ensure the action is accessible and does not obscure content or navigation.
+- [ ] Use a Hugeicons Add/Plus icon with an accessible text label or accessible icon-only control label.
 
 ### Phase 7 verification
 
@@ -403,6 +444,7 @@ Phase 1 verification notes:
 - [ ] Label dates such as Today using local calendar dates.
 - [ ] Implement current-month and previous-month filters.
 - [ ] Optionally add a simple category filter if it remains within MVP scope.
+- [ ] Present month/category filters in a Gorhom bottom sheet with Hugeicons filter/category iconography.
 - [ ] Add pagination before history size becomes unbounded.
 - [ ] Show loading, retryable error, pull-to-refresh, and no-expenses states.
 
@@ -410,6 +452,7 @@ Phase 1 verification notes:
 
 - [ ] Show amount, title, date, payer, category, notes, participants, exact split amounts, and creator.
 - [ ] Show edit/delete actions only when the user appears permitted.
+- [ ] Use Hugeicons for edit, delete, payer, participant, category, notes, and date affordances where icons aid scanning.
 - [ ] Enforce edit/delete authorization in the database regardless of UI visibility.
 - [ ] Preserve the historical participant set during display.
 - [ ] Handle an inactive historical member gracefully.
@@ -424,7 +467,7 @@ Phase 1 verification notes:
 
 ### Feature: Delete expense
 
-- [ ] Add a clear destructive-action confirmation.
+- [ ] Add a clear destructive-action confirmation using the shared Gorhom confirmation sheet.
 - [ ] Delete the expense and splits using intentional atomic/cascade behavior.
 - [ ] Refresh spending, balances, budget, history, and activity after success.
 - [ ] Handle authorization or network failure without falsely removing the record from UI.
@@ -453,6 +496,8 @@ Phase 1 verification notes:
 - [ ] Validate a positive amount inline and server-side.
 - [ ] Save the first day of the selected month as `month_start`.
 - [ ] Offer to use the previous month's budget only after explicit user confirmation.
+- [ ] Use Gorhom bottom sheets for month selection and the explicit “use last month” confirmation.
+- [ ] Use Hugeicons for budget, calendar, edit, and confirmation affordances.
 - [ ] Enforce admin-only changes at the database layer.
 
 ### Feature: Budget presentation
@@ -487,6 +532,7 @@ Phase 1 verification notes:
 - [ ] Use clear positive, negative, and zero visual states without relying on color alone.
 - [ ] Handle inactive members with historical balances.
 - [ ] Show loading, retryable error, and all-settled empty states.
+- [ ] Use Hugeicons for owed/owing/settled states and Settle Up actions without relying on icons or color alone.
 
 ### Phase 10 verification
 
@@ -504,6 +550,8 @@ Phase 1 verification notes:
 - [ ] Default the amount to the relevant outstanding balance where unambiguous.
 - [ ] Validate positive amount and different paying/receiving members inline and server-side.
 - [ ] Restrict member choices and allowed participation according to the final authorization model.
+- [ ] Use Gorhom bottom sheets for paying-member, receiving-member, and date selection.
+- [ ] Use Hugeicons for transfer direction, members, date, notes, and confirmation actions.
 - [ ] Store settlement time without corrupting the user-selected local date intent.
 - [ ] Prevent duplicate submissions.
 - [ ] Refresh balances and activity only after successful persistence.
@@ -530,7 +578,9 @@ Phase 1 verification notes:
 ### Feature: Main Expo Router navigation
 
 - [ ] Create authenticated bottom tabs for Home, Expenses, Balances, and Settings.
-- [ ] Add stack/modal routes for add expense, expense details/edit, settle up, workspace onboarding, members, invites, and budget management.
+- [ ] Use Hugeicons exclusively for Home, Expenses, Balances, and Settings tab icons with selected/unselected theme states.
+- [ ] Add stack routes for add expense, expense details/edit, settle up, workspace onboarding, members, invites, and budget management.
+- [ ] Use shared Gorhom bottom sheets for modal-style overlays inside routes; do not use React Native modal presentation.
 - [ ] Ensure back behavior and deep links work on Android and iOS.
 - [ ] Keep protected routes behind the auth/workspace guard.
 - [ ] Use accessible tab labels/icons and safe-area handling.
@@ -543,6 +593,7 @@ Phase 1 verification notes:
 - [ ] Show the authenticated user's current balance in plain language.
 - [ ] Show a prominent Add Expense quick action.
 - [ ] Show recent expense and settlement activity.
+- [ ] Use Hugeicons for dashboard sections, quick actions, expense categories, and activity types where they improve scanning.
 - [ ] Keep analytics intentionally limited to the MVP questions.
 - [ ] Avoid duplicate/N+1 requests and fetch dashboard data efficiently.
 
@@ -567,6 +618,7 @@ Phase 1 verification notes:
 ### Feature: Settings screen
 
 - [ ] Add Profile, Workspace, Members, Monthly Budget, Invite Members, and Sign Out entries.
+- [ ] Use Hugeicons for every settings row and disclosure/action affordance.
 - [ ] Hide or explain admin-only actions for regular members while retaining server enforcement.
 - [ ] Keep settings navigation and content intentionally simple.
 
@@ -586,7 +638,7 @@ Phase 1 verification notes:
 
 ### Feature: Sign out
 
-- [ ] Confirm/execute sign out with a progress state.
+- [ ] Confirm/execute sign out with a progress state using the shared Gorhom confirmation sheet.
 - [ ] Clear session-scoped cached data and active-workspace selection safely.
 - [ ] Return to the authentication flow without protected-screen flashes.
 
@@ -611,6 +663,7 @@ Phase 1 verification notes:
 
 ### Feature: Required empty states
 
+- [ ] Use appropriate Hugeicons through `AppIcon` for empty, loading-success context, warning, and error illustrations where an icon adds meaning.
 - [ ] No expenses: “No expenses yet. Add your first shared expense.”
 - [ ] No budget: “No budget set for [month]. Set a monthly budget to track your spending.”
 - [ ] Zero balance: “You're all settled up.”
@@ -675,7 +728,22 @@ Phase 1 verification notes:
 - [ ] Verify text scaling and large financial amounts do not break critical layouts.
 - [ ] Verify keyboard avoidance, focus order, input types, and submit behavior.
 - [ ] Verify Android back behavior and iOS gestures.
+- [ ] Verify bottom-sheet focus, announcements, dismissal gestures, backdrop behavior, and Android back handling.
+- [ ] Verify every meaningful icon-only control has an accessible label and decorative Hugeicons are hidden appropriately.
 - [ ] Verify light/dark mode contrast if both modes are enabled.
+
+### Feature: Icon and overlay implementation audit
+
+- [ ] Verify all interface icons render through the shared Hugeicons `AppIcon` primitive.
+- [ ] Verify icon imports are named imports and remain tree-shakeable.
+- [ ] Verify no Expo Symbols, vector-icon packs, emoji glyphs, or ad hoc SVGs are used as interface icons.
+- [ ] Verify app/splash branding, avatars, and content imagery remain correctly outside the interface-icon abstraction.
+- [ ] Verify no feature imports `Modal` from React Native.
+- [ ] Verify no feature uses Expo UI BottomSheet or another modal/sheet implementation instead of Gorhom.
+- [ ] Verify every modal-style application overlay uses the shared Gorhom bottom-sheet abstraction.
+- [ ] Verify sheets use Gorhom-integrated text input/list/scroll primitives where gesture or keyboard integration requires them.
+- [ ] Verify destructive confirmations use the shared confirmation sheet.
+- [ ] Verify deep-linkable and multi-step flows remain stack routes rather than being forced into sheets.
 
 ### Phase 15 verification
 
@@ -694,6 +762,8 @@ Phase 1 verification notes:
 - [ ] Add unit tests for date/month utilities.
 - [ ] Add tests for balance and budget response mapping/presentation.
 - [ ] Add component/form tests for required validation and states.
+- [ ] Add component tests for `AppIcon`, accessible icon buttons, and Hugeicons theme states.
+- [ ] Add component/integration tests for bottom-sheet presentation, dismissal, confirmation, and keyboard-safe form behavior.
 - [ ] Add database tests for migrations, constraints, RPCs, atomicity, and RLS.
 - [ ] Add integration or scripted acceptance tests for the eight required scenarios.
 - [ ] Add test scripts to `package.json`.
@@ -710,6 +780,7 @@ Phase 1 verification notes:
 
 - [ ] Replace the starter README with the Flatdues project overview.
 - [ ] Document the tech stack and prerequisites.
+- [ ] Document Hugeicons as the only interface icon system and Gorhom Bottom Sheet as the only modal-overlay primitive.
 - [ ] Document environment variables and the prohibition on service-role keys in the app.
 - [ ] Document Supabase project setup and authentication configuration.
 - [ ] Document applying/resetting migrations and generating database types.
@@ -738,6 +809,7 @@ Phase 1 verification notes:
 - [ ] Run lint successfully with no ignored new errors.
 - [ ] Apply/reset Supabase migrations successfully from a clean database.
 - [ ] Verify no secrets, dead code, unnecessary `any`, duplicate financial formulas, or raw screen-level Supabase queries remain.
+- [ ] Verify no unauthorized icon library, direct Hugeicons styling duplication, React Native `Modal`, or custom modal overlay remains.
 - [ ] Verify Android behavior on a development build or representative device/emulator.
 - [ ] Verify iOS behavior on a development build or representative device/simulator.
 - [ ] Walk through every acceptance scenario using concrete records and record results.
