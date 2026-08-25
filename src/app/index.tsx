@@ -1,98 +1,108 @@
-import * as Device from 'expo-device';
-import { Platform, StyleSheet } from 'react-native';
-import { SafeAreaView } from 'react-native-safe-area-context';
+import { ScrollView, StyleSheet, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
-import { AnimatedIcon } from '@/components/animated-icon';
-import { HintRow } from '@/components/hint-row';
-import { ThemedText } from '@/components/themed-text';
-import { ThemedView } from '@/components/themed-view';
-import { WebBadge } from '@/components/web-badge';
-import { BottomTabInset, MaxContentWidth, Spacing } from '@/constants/theme';
+import { AppText, Avatar, Card, MoneyText, SectionHeader } from "@/components";
+import { radii, spacing, useAppTheme } from "@/theme";
 
-function getDevMenuHint() {
-  if (Platform.OS === 'web') {
-    return <ThemedText type="small">use browser devtools</ThemedText>;
-  }
-  if (Device.isDevice) {
-    return (
-      <ThemedText type="small">
-        shake device or press <ThemedText type="code">m</ThemedText> in terminal
-      </ThemedText>
-    );
-  }
-  const shortcut = Platform.OS === 'android' ? 'cmd+m (or ctrl+m)' : 'cmd+d';
+export default function Index() {
+  const { colors } = useAppTheme();
+
   return (
-    <ThemedText type="small">
-      press <ThemedText type="code">{shortcut}</ThemedText>
-    </ThemedText>
-  );
-}
+    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+      <ScrollView
+        contentContainerStyle={styles.content}
+        contentInsetAdjustmentBehavior="automatic"
+      >
+        <View style={styles.hero}>
+          <View style={[styles.eyebrow, { backgroundColor: colors.accentSoft }]}>
+            <AppText tone="accent" variant="label">
+              Shared home finances
+            </AppText>
+          </View>
+          <AppText accessibilityRole="header" variant="display">
+            Flatdues
+          </AppText>
+          <AppText tone="muted">
+            A trustworthy place for flatmates to track expenses, budgets, and
+            who owes what.
+          </AppText>
+        </View>
 
-export default function HomeScreen() {
-  return (
-    <ThemedView style={styles.container}>
-      <SafeAreaView style={styles.safeArea}>
-        <ThemedView style={styles.heroSection}>
-          <AnimatedIcon />
-          <ThemedText type="title" style={styles.title}>
-            Welcome to&nbsp;Expo
-          </ThemedText>
-        </ThemedView>
-
-        <ThemedText type="code" style={styles.code}>
-          get started
-        </ThemedText>
-
-        <ThemedView type="backgroundElement" style={styles.stepContainer}>
-          <HintRow
-            title="Try editing"
-            hint={<ThemedText type="code">src/app/index.tsx</ThemedText>}
+        <Card accessibilityLabel="Design system preview" padding="large">
+          <SectionHeader
+            action={<Avatar name="Flat 302" />}
+            description="Phase 1 foundation"
+            title="Architecture ready"
           />
-          <HintRow title="Dev tools" hint={getDevMenuHint()} />
-          <HintRow
-            title="Fresh start"
-            hint={<ThemedText type="code">npm run reset-project</ThemedText>}
-          />
-        </ThemedView>
+          <View style={[styles.divider, { backgroundColor: colors.border }]} />
+          <View style={styles.amountGroup}>
+            <AppText tone="muted" variant="label">
+              Example monthly spending
+            </AppText>
+            <MoneyText amount={18450} variant="title" />
+            <View style={styles.remainingRow}>
+              <MoneyText amount={11550} state="positive" variant="label" />
+              <AppText tone="positive" variant="label">
+                remaining in the example budget
+              </AppText>
+            </View>
+          </View>
+        </Card>
 
-        {Platform.OS === 'web' && <WebBadge />}
-      </SafeAreaView>
-    </ThemedView>
+        <Card padding="large" variant="muted">
+          <AppText variant="heading">Built for the daily flow</AppText>
+          <AppText tone="muted">
+            The next phases connect secure authentication and workspace data.
+            Adding an expense will remain the quickest action in the app.
+          </AppText>
+        </Card>
+
+        <AppText style={styles.footer} tone="muted" variant="caption">
+          Expo SDK 56 · Android and iOS
+        </AppText>
+      </ScrollView>
+    </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
-    flex: 1,
-    justifyContent: 'center',
-    flexDirection: 'row',
+  amountGroup: {
+    gap: spacing.xxs,
+  },
+  content: {
+    alignSelf: "center",
+    gap: spacing.md,
+    maxWidth: 680,
+    padding: spacing.lg,
+    paddingBottom: spacing.xxl,
+    width: "100%",
+  },
+  divider: {
+    height: StyleSheet.hairlineWidth,
+    marginVertical: spacing.lg,
+  },
+  eyebrow: {
+    alignSelf: "flex-start",
+    borderRadius: radii.pill,
+    paddingHorizontal: spacing.sm,
+    paddingVertical: spacing.xs,
+  },
+  footer: {
+    marginTop: spacing.xs,
+    textAlign: "center",
+  },
+  hero: {
+    gap: spacing.sm,
+    paddingHorizontal: spacing.xs,
+    paddingVertical: spacing.lg,
+  },
+  remainingRow: {
+    alignItems: "center",
+    flexDirection: "row",
+    flexWrap: "wrap",
+    gap: spacing.xxs,
   },
   safeArea: {
     flex: 1,
-    paddingHorizontal: Spacing.four,
-    alignItems: 'center',
-    gap: Spacing.three,
-    paddingBottom: BottomTabInset + Spacing.three,
-    maxWidth: MaxContentWidth,
-  },
-  heroSection: {
-    alignItems: 'center',
-    justifyContent: 'center',
-    flex: 1,
-    paddingHorizontal: Spacing.four,
-    gap: Spacing.four,
-  },
-  title: {
-    textAlign: 'center',
-  },
-  code: {
-    textTransform: 'uppercase',
-  },
-  stepContainer: {
-    gap: Spacing.three,
-    alignSelf: 'stretch',
-    paddingHorizontal: Spacing.three,
-    paddingVertical: Spacing.four,
-    borderRadius: Spacing.four,
   },
 });

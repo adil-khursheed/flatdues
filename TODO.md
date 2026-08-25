@@ -1,0 +1,759 @@
+# Flatdues MVP TODO
+
+This file is the implementation tracker for the Flatdues production-quality MVP described in the project brief.
+
+## Status legend
+
+- `[ ]` Incomplete
+- `[x]` Complete and verified
+- A feature is complete only when its implementation, validation, authorization, loading/error states, and relevant checks/tests are complete.
+- After completing an item, add a short verification note or link to the relevant file/commit when useful.
+
+## Current project constraints
+
+- [x] Confirm the existing project is Expo SDK 56 (`expo ~56.0.20`) with React Native 0.85.3 and React 19.2.3.
+- [x] Confirm Expo Router is configured as the application entry point and typed routes are enabled.
+- [x] Confirm TypeScript strict mode and the `@/*` source alias are enabled.
+- [x] Confirm the app is currently a minimal starter with only a root stack and placeholder index screen.
+- [x] Confirm `expo-secure-store` and a custom `flatdues` URL scheme are already configured.
+- [x] Confirm Supabase and application testing dependencies are not installed yet.
+- [x] Confirm the repository has pre-existing uncommitted changes that must be preserved.
+- [x] Record that `reset-project` still exists in `package.json` although `scripts/reset-project.js` is deleted.
+- [x] Read the exact Expo SDK 56 documentation at <https://docs.expo.dev/versions/v56.0.0/> before changing application code.
+- [x] Confirm the supported Android and iOS development/build workflow for the available host environment.
+- [x] Decide whether the already-installed UI/animation packages are needed; avoid adding another UI library without a clear benefit.
+
+## Phase 1 — Project inspection and architecture
+
+### Feature: Repository baseline
+
+- [x] Review the product brief and required implementation order.
+- [x] Inspect `package.json`, Expo configuration, TypeScript configuration, app routes, README, and repository file structure.
+- [x] Inspect the current Git status without modifying the user's existing changes.
+- [ ] Run the untouched application and record the current Android/iOS/Web baseline behavior.
+- [x] Run the initial TypeScript check and lint check; record and triage existing errors separately from new errors.
+- [x] Remove or repair the stale `reset-project` script entry without discarding unrelated user changes.
+
+### Feature: Application architecture
+
+- [x] Create a feature-oriented `src` structure for auth, workspaces, members, invites, expenses, budgets, balances, settlements, and settings.
+- [x] Create shared directories for components, hooks, Supabase access, services/repositories, types, theme, validation, and utilities.
+- [x] Keep route files and screens small by moving data access and business logic into feature modules.
+- [x] Define query keys and a consistent server-state invalidation strategy.
+- [x] Decide whether TanStack Query is beneficial; otherwise document and use a clean Supabase repository/service abstraction.
+- [x] Document architectural decisions, including financial derivation rules and server/client trust boundaries.
+
+### Feature: Design system foundations
+
+- [x] Define reusable colors, spacing, typography, radii, shadows, and positive/negative/neutral financial states.
+- [x] Support system light/dark appearance where practical without delaying core behavior.
+- [x] Implement `AppText`.
+- [x] Implement `Button` with loading, disabled, and accessible states.
+- [x] Implement `Card`.
+- [x] Implement `Input` with label, help text, and inline validation.
+- [x] Implement `MoneyText`.
+- [x] Implement `Avatar` with image and initials fallback.
+- [x] Implement `EmptyState`.
+- [x] Implement `LoadingState`.
+- [x] Implement `ErrorState` with retry/recovery action where appropriate.
+- [x] Implement `SectionHeader`.
+- [x] Verify generous spacing, readable amounts, rounded components, accessible contrast, and at least 44×44 touch targets.
+
+### Phase 1 verification
+
+- [x] TypeScript passes.
+- [x] Lint passes.
+- [ ] Root route renders on Android and iOS without warnings or blank states.
+
+Phase 1 verification notes:
+
+- [x] `pnpm check` passes after the Phase 1 implementation.
+- [x] Expo SDK dependency compatibility check reports all dependencies up to date.
+- [x] Production export completes for Android, iOS, and web; the web root is statically rendered with expected content.
+- [ ] Interactive Android/iOS rendering remains to be checked on a connected device or simulator; this Windows host has no available emulator and cannot run an iOS simulator.
+- The pre-change TypeScript baseline passed. The pre-change lint command could not run because ESLint was not configured; Phase 1 added the Expo SDK 56 flat configuration and compatible dependencies.
+- The pre-change app itself was not launched before source changes, so that historical baseline item remains intentionally unchecked.
+
+## Phase 2 — Supabase client configuration
+
+### Feature: Dependencies and environment
+
+- [ ] Install `@supabase/supabase-js` using versions compatible with Expo SDK 56.
+- [ ] Add any required React Native URL/polyfill dependency only if current Supabase guidance requires it.
+- [ ] Create `.env.example` containing `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` placeholders.
+- [ ] Confirm real secrets are ignored and no service-role key is present in mobile code or repository history.
+- [ ] Validate required public environment variables at startup and show a developer-friendly configuration error.
+- [ ] Document local environment setup.
+
+### Feature: Typed Supabase client
+
+- [ ] Create a singleton, typed Supabase client.
+- [ ] Persist auth sessions with Expo SecureStore using an Expo-compatible storage adapter.
+- [ ] Configure session refresh and React Native app-state handling correctly.
+- [ ] Configure deep-link URL handling only if passwordless auth is selected.
+- [ ] Add a repeatable command/process for generating Supabase database TypeScript types.
+- [ ] Avoid untyped response casts and unnecessary `any`.
+
+### Phase 2 verification
+
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+- [ ] Supabase client initializes with valid development environment variables.
+- [ ] Missing environment variables fail clearly without exposing secrets.
+
+## Phase 3 — Database schema and Row Level Security
+
+### Feature: Supabase migration foundation
+
+- [ ] Initialize/version a `supabase` project directory and migrations in the repository.
+- [ ] Add required PostgreSQL extensions using migration-safe statements.
+- [ ] Add a reusable `updated_at` trigger function.
+- [ ] Add non-recursive authorization helpers such as `is_workspace_member` and `is_workspace_admin`.
+- [ ] Ensure security-definer functions pin a safe `search_path` and perform explicit authorization.
+
+### Feature: Profiles schema
+
+- [ ] Create `profiles` with `id`, `display_name`, nullable `avatar_url`, `created_at`, and `updated_at`.
+- [ ] Reference `auth.users(id)` with the intended delete behavior.
+- [ ] Add a safe new-user profile creation trigger or an equivalent idempotent application flow.
+- [ ] Enable RLS and add read/update policies that expose only appropriate profile data.
+
+### Feature: Workspaces schema
+
+- [ ] Create `workspaces` with name, ISO currency code defaulting to `INR`, creator, and audit timestamps.
+- [ ] Validate non-empty workspace names and valid currency storage.
+- [ ] Add foreign keys and useful indexes.
+- [ ] Enable RLS so only active members can read a workspace.
+- [ ] Restrict workspace updates to active admins.
+
+### Feature: Workspace memberships schema
+
+- [ ] Create `workspace_members` with composite uniqueness on workspace and user.
+- [ ] Constrain roles to `admin` or `member`.
+- [ ] Constrain status to `active` or `inactive`.
+- [ ] Store `joined_at` and nullable `deactivated_at` without deleting membership history.
+- [ ] Add `workspace_id, user_id` and member lookup indexes.
+- [ ] Enable RLS and prevent clients from inserting themselves into arbitrary workspaces.
+- [ ] Restrict role/status management to authorized admins while preventing unsafe removal of the last admin.
+
+### Feature: Workspace invitations schema
+
+- [ ] Create `workspace_invites` with unique secure token, creator, expiry, maximum uses, usage count, and timestamps.
+- [ ] Validate non-negative limits/counts and prevent usage count from exceeding the maximum.
+- [ ] Add indexes for token and workspace lookups.
+- [ ] Enable RLS so only active admins can list, create, or revoke invitations.
+- [ ] Ensure raw invite lookup does not leak workspace data to unrelated users.
+
+### Feature: Monthly budgets schema
+
+- [ ] Create `monthly_budgets` with unique workspace/month start records.
+- [ ] Enforce `amount > 0` and require `month_start` to be the first calendar day of its month.
+- [ ] Store amounts as `NUMERIC(12,2)`.
+- [ ] Add the `workspace_id, month_start` index.
+- [ ] Enable RLS for member reads and admin-only writes.
+
+### Feature: Expenses schema
+
+- [ ] Create `expenses` with workspace, title, amount, payer, local expense date, category, notes, creator, and timestamps.
+- [ ] Enforce a non-empty title and `amount > 0` using `NUMERIC(12,2)`.
+- [ ] Validate that payer and creator relationships are compatible with the workspace model.
+- [ ] Add indexes for `(workspace_id, expense_date)` and `payer_id`.
+- [ ] Enable RLS for member reads.
+- [ ] Allow members to edit/delete only expenses they created and admins to manage any workspace expense.
+- [ ] Ensure edits cannot bypass split integrity or historical rules.
+
+### Feature: Expense splits schema
+
+- [ ] Create immutable historical `expense_splits` with unique expense/user rows.
+- [ ] Store `share_amount` as `NUMERIC(12,2)` and require a positive share.
+- [ ] Add indexes for `expense_id` and `user_id`.
+- [ ] Enable RLS through authorized access to the parent expense/workspace.
+- [ ] Prevent direct client writes that could create incomplete or mismatched split totals.
+- [ ] Ensure membership deactivation never changes historical splits.
+
+### Feature: Settlements schema
+
+- [ ] Create `settlements` with workspace, paying member, receiving member, amount, settlement timestamp, notes, creator, and audit timestamp.
+- [ ] Enforce `amount > 0` and `from_user_id <> to_user_id`.
+- [ ] Add the `(workspace_id, settled_at)` index.
+- [ ] Enable RLS for workspace-member reads.
+- [ ] Restrict creation/update/delete to allowed participants and authorized admins according to the final permission model.
+- [ ] Ensure settlements never mutate expenses, spending totals, or budgets.
+
+### Feature: Atomic workspace creation RPC
+
+- [ ] Create an authorized RPC that atomically inserts a workspace and its creator as an active admin.
+- [ ] Validate and normalize workspace name and default currency server-side.
+- [ ] Return the created workspace in a typed shape.
+- [ ] Prevent partial workspace creation.
+
+### Feature: Secure invitation RPCs
+
+- [ ] Create an admin-only invite generation RPC using cryptographically secure, non-predictable tokens.
+- [ ] Support optional expiry and usage limits.
+- [ ] Create an authenticated join RPC that locks/updates invite usage atomically.
+- [ ] Validate invalid, expired, exhausted, missing-workspace, and already-member cases server-side.
+- [ ] Prevent arbitrary direct membership insertion and invite race-condition overuse.
+- [ ] Return stable error codes that the app can translate into friendly messages.
+
+### Feature: Atomic expense RPC
+
+- [ ] Create an authenticated RPC that atomically creates an expense and exact split rows.
+- [ ] Validate caller membership, positive amount, non-empty title, valid payer, and at least one unique participant.
+- [ ] Validate participant membership according to active/historical edit rules.
+- [ ] Calculate in minor units or safe decimal arithmetic, never binary floating point.
+- [ ] Allocate rounding remainders deterministically so split rows total the expense exactly.
+- [ ] Prevent partial expenses when any validation or insert fails.
+- [ ] Define a safe atomic edit flow that preserves or replaces splits consistently.
+- [ ] Define a safe delete flow with intentional cascade/audit behavior.
+
+### Feature: Balance calculation RPC
+
+- [ ] Create `get_workspace_balances(workspace_id)` with an explicit membership authorization check.
+- [ ] Return user ID, display name, paid total, share total, settlements sent, settlements received, and balance.
+- [ ] Implement `balance = paid_total - share_total - settlements_sent + settlements_received`.
+- [ ] Include inactive members when historical records give them a non-zero position.
+- [ ] Ensure all member balances sum exactly to zero at currency precision.
+- [ ] Prevent data disclosure for unrelated workspaces.
+
+### Feature: Spending and dashboard queries
+
+- [ ] Create efficient monthly spending data access derived only from expenses.
+- [ ] Create efficient daily spending data access derived only from expenses and a supplied local calendar date.
+- [ ] Create recent activity data access that combines expenses and settlements without treating settlements as spending.
+- [ ] Avoid N+1 profile/member queries.
+
+### Phase 3 verification
+
+- [ ] Apply all migrations to a clean local/development Supabase database.
+- [ ] Reapply/reset migrations successfully from zero.
+- [ ] Generate fresh database TypeScript types.
+- [ ] Verify all user-facing tables have RLS enabled and expected policies.
+- [ ] Add database tests for constraints, RLS isolation, invitation races, atomic expense creation, exact rounding, and balance zero-sum behavior.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 4 — Authentication
+
+### Feature: Authentication strategy
+
+- [ ] Decide between passwordless email OTP/magic link and email/password after validating Expo/Supabase SDK 56 deep-link complexity.
+- [ ] Isolate the auth provider implementation so another provider can be added later.
+- [ ] Document the selected flow and any Supabase dashboard redirect configuration.
+
+### Feature: Session lifecycle
+
+- [ ] Create an auth provider/hook with initial session loading, signed-in, and signed-out states.
+- [ ] Restore persisted sessions securely on application launch.
+- [ ] Refresh sessions while the app is active and stop refresh behavior appropriately in the background.
+- [ ] Handle expired/revoked sessions and sign-out cleanup.
+- [ ] Ensure the profile row exists after first authentication.
+
+### Feature: Login and signup UI
+
+- [ ] Build the email authentication screen.
+- [ ] Validate email and password/OTP inputs inline.
+- [ ] Show submission loading and prevent duplicate requests.
+- [ ] Translate Supabase authentication errors into understandable user messages.
+- [ ] Handle confirmation/magic-link return state if required.
+- [ ] Provide retry and navigation between login/signup states.
+
+### Feature: Auth routing guard
+
+- [ ] Route unauthenticated users to authentication.
+- [ ] Route authenticated users with no active workspace membership to onboarding.
+- [ ] Route authenticated users with a workspace membership to the main app.
+- [ ] Show a loading state while session and membership are being resolved.
+- [ ] Prevent protected screens from briefly rendering during resolution.
+
+### Phase 4 verification
+
+- [ ] Sign up, sign in, app restart/session restore, expired session, and sign out work on Android.
+- [ ] Sign up, sign in, app restart/session restore, expired session, and sign out work on iOS.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 5 — Workspace create/join flow
+
+### Feature: Workspace onboarding
+
+- [ ] Build the onboarding choice screen with Create Workspace and Join Workspace actions.
+- [ ] Add suitable loading, error, and signed-in user context states.
+- [ ] Prevent entry when the user is not authenticated.
+
+### Feature: Create workspace
+
+- [ ] Build the create workspace form with required name validation.
+- [ ] Call the atomic workspace creation RPC.
+- [ ] Make the creator an active admin automatically.
+- [ ] Set the default currency to `INR` without hard-coding a currency symbol into calculations.
+- [ ] Refresh active-workspace state and enter the new workspace.
+- [ ] Offer invite-code creation/copy/share after success.
+
+### Feature: Join workspace
+
+- [ ] Build invite token entry/paste UI.
+- [ ] Normalize token input without weakening token validation.
+- [ ] Call the secure invitation join RPC.
+- [ ] Show friendly errors for invalid, expired, exhausted, and already-member invitations.
+- [ ] Refresh membership/active-workspace state and enter the workspace after success.
+
+### Feature: Active workspace foundation
+
+- [ ] Support a database model with multiple memberships even if the MVP UI selects a single active workspace.
+- [ ] Store/select the active workspace without making it an authorization mechanism.
+- [ ] Handle an inactive or deleted active-workspace selection safely.
+
+### Phase 5 verification
+
+- [ ] Acceptance Scenario 1 — Create Workspace passes.
+- [ ] Join flow cannot be used to insert an arbitrary membership.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 6 — Members and invitations
+
+### Feature: Members list
+
+- [ ] Show name, avatar/initial, role, and active/inactive status for each member.
+- [ ] Avoid N+1 profile fetching.
+- [ ] Show a useful empty/single-member state.
+- [ ] Restrict management controls in the UI while relying on database authorization for enforcement.
+
+### Feature: Invite management
+
+- [ ] Allow admins to generate an invitation with safe defaults.
+- [ ] Display and copy the invite code.
+- [ ] Share the invite through the native share sheet.
+- [ ] Show expiry and remaining-use information when configured.
+- [ ] Allow admins to revoke an active invitation.
+- [ ] Show loading, success, and friendly failure feedback.
+
+### Feature: Membership management
+
+- [ ] Allow an admin to mark another member inactive without deleting history.
+- [ ] Exclude inactive members from new-expense defaults.
+- [ ] Optionally support promotion to admin if it can be implemented safely within MVP scope.
+- [ ] Prevent unsafe demotion/deactivation of the last active admin.
+- [ ] Decide and enforce whether users can leave a workspace themselves.
+
+### Phase 6 verification
+
+- [ ] Acceptance Scenario 2 — Invite Members passes with five active members.
+- [ ] Acceptance Scenario 7 — Member Leaves preserves history and changes new-expense defaults.
+- [ ] Non-admin membership/invite mutations fail at the database layer.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 7 — Expense creation and equal splitting
+
+### Feature: Money utilities
+
+- [ ] Implement a reusable ISO-currency formatter using workspace currency.
+- [ ] Implement safe conversion between user-entered decimal amounts and minor units/decimal strings.
+- [ ] Use consistent rounding and reject invalid precision/negative/zero values.
+- [ ] Add unit tests for INR formatting, parsing, large values, and rounding edge cases.
+
+### Feature: Date utilities
+
+- [ ] Represent `expense_date` as a local calendar date without UTC shifting.
+- [ ] Implement device-local Today labeling and date formatting.
+- [ ] Add tests around timezone boundaries and month transitions.
+
+### Feature: Add Expense form
+
+- [ ] Build fields for amount, title/description, category, date, payer, participants, and notes.
+- [ ] Default date to the device's current local date.
+- [ ] Default payer to the authenticated member.
+- [ ] Default participants to all active workspace members.
+- [ ] Keep the common path fast: amount, description, Add Expense.
+- [ ] Allow any active member to be selected as payer.
+- [ ] Allow participant selection/deselection and technically allow payer outside participants.
+- [ ] Prevent zero selected participants.
+- [ ] Validate required title, payer, amount, positive amount, and participants inline.
+- [ ] Show an approximate per-person share before saving.
+- [ ] Use categories: Groceries, Food, Utilities, Rent, Housekeeping, Maintenance, Household, Transport, and Other.
+- [ ] Keep category definitions centralized and future-configurable.
+- [ ] Submit through the atomic expense RPC and prevent duplicate submissions.
+- [ ] Refresh expense, balance, budget, dashboard, and activity data only after success.
+- [ ] Show friendly server validation errors without exposing raw Postgres text.
+
+### Feature: Prominent Add Expense action
+
+- [ ] Choose a clean prominent action compatible with the final tab/stack structure.
+- [ ] Make Add Expense reachable with one obvious interaction from Home.
+- [ ] Ensure the action is accessible and does not obscure content or navigation.
+
+### Phase 7 verification
+
+- [ ] Acceptance Scenario 3 — Equal Expense stores five exact ₹200 splits and produces the expected zero-sum balances.
+- [ ] Acceptance Scenario 4 — Selected Participants affects only the selected members.
+- [ ] Verify a non-even split (for example ₹100 / 3) stores deterministic exact splits totaling ₹100.
+- [ ] Verify payer-not-participant behavior.
+- [ ] Verify inactive members cannot be accidentally included in a new expense.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 8 — Expense history and details
+
+### Feature: Expense history
+
+- [ ] Build the Expenses tab ordered/grouped by expense date.
+- [ ] Show title, formatted amount, category, date, payer, and participant count.
+- [ ] Label dates such as Today using local calendar dates.
+- [ ] Implement current-month and previous-month filters.
+- [ ] Optionally add a simple category filter if it remains within MVP scope.
+- [ ] Add pagination before history size becomes unbounded.
+- [ ] Show loading, retryable error, pull-to-refresh, and no-expenses states.
+
+### Feature: Expense details
+
+- [ ] Show amount, title, date, payer, category, notes, participants, exact split amounts, and creator.
+- [ ] Show edit/delete actions only when the user appears permitted.
+- [ ] Enforce edit/delete authorization in the database regardless of UI visibility.
+- [ ] Preserve the historical participant set during display.
+- [ ] Handle an inactive historical member gracefully.
+
+### Feature: Edit expense
+
+- [ ] Build a prefilled edit form for permitted users.
+- [ ] Use an atomic server-side operation when changes affect splits.
+- [ ] Recalculate exact splits safely when amount or participants change.
+- [ ] Preserve the original record when update validation fails.
+- [ ] Refresh all affected queries after success.
+
+### Feature: Delete expense
+
+- [ ] Add a clear destructive-action confirmation.
+- [ ] Delete the expense and splits using intentional atomic/cascade behavior.
+- [ ] Refresh spending, balances, budget, history, and activity after success.
+- [ ] Handle authorization or network failure without falsely removing the record from UI.
+
+### Phase 8 verification
+
+- [ ] History filters and pagination do not duplicate or omit records.
+- [ ] Member permissions and admin overrides work at both UI and database layers.
+- [ ] Editing/deleting an expense updates derived values correctly.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 9 — Monthly budget
+
+### Feature: Monthly budget data access
+
+- [ ] Fetch the budget for a selected calendar month.
+- [ ] Derive monthly spending only from expense amounts in that month.
+- [ ] Calculate `remaining = budget - spent` and `percentageUsed = spent / budget × 100` safely.
+- [ ] Exclude settlements from all budget calculations.
+- [ ] Preserve independent historical budget records without automatic carry-over.
+
+### Feature: Budget management
+
+- [ ] Build an admin-only monthly budget create/update form.
+- [ ] Validate a positive amount inline and server-side.
+- [ ] Save the first day of the selected month as `month_start`.
+- [ ] Offer to use the previous month's budget only after explicit user confirmation.
+- [ ] Enforce admin-only changes at the database layer.
+
+### Feature: Budget presentation
+
+- [ ] Show budget, spent amount, remaining amount, and percentage used.
+- [ ] Show an understandable progress indicator.
+- [ ] Show “over budget” with the overage amount instead of a negative remaining value.
+- [ ] Show a no-budget empty state with an admin action or member explanation.
+- [ ] Handle loading and retryable errors.
+
+### Phase 9 verification
+
+- [ ] Acceptance Scenario 5 — Monthly Budget passes and settlements do not change it.
+- [ ] Verify over-budget, no-budget, zero-expense, previous-month, and month-boundary cases.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 10 — Balance calculation and Balances screen
+
+### Feature: Balance data layer
+
+- [ ] Use the single server-side balance formula rather than duplicating financial calculations in screens.
+- [ ] Type the balance RPC response without blind casts.
+- [ ] Invalidate/refetch balances after expense and settlement mutations.
+- [ ] Treat database decimal values safely in UI formatting.
+
+### Feature: Balances tab
+
+- [ ] Show the authenticated user's position first.
+- [ ] Use “You are owed”, “You owe”, or “You're all settled up” wording.
+- [ ] Show every relevant workspace member with “Gets back”, “Owes”, or settled wording.
+- [ ] Use clear positive, negative, and zero visual states without relying on color alone.
+- [ ] Handle inactive members with historical balances.
+- [ ] Show loading, retryable error, and all-settled empty states.
+
+### Phase 10 verification
+
+- [ ] Reverify Scenario 3 balance results and exact zero sum.
+- [ ] Verify multiple payers, overlapping participant groups, edits, deletes, and inactive historical members.
+- [ ] Verify an unauthorized workspace balance request fails.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 11 — Settlements
+
+### Feature: Settlement recording
+
+- [ ] Build Settle Up fields for paying member, receiving member, amount, date, and notes.
+- [ ] Default the amount to the relevant outstanding balance where unambiguous.
+- [ ] Validate positive amount and different paying/receiving members inline and server-side.
+- [ ] Restrict member choices and allowed participation according to the final authorization model.
+- [ ] Store settlement time without corrupting the user-selected local date intent.
+- [ ] Prevent duplicate submissions.
+- [ ] Refresh balances and activity only after successful persistence.
+- [ ] Confirm no expense record is created.
+
+### Feature: Settlement history
+
+- [ ] Show settlements in recent activity.
+- [ ] Provide an appropriate settlement history view or section.
+- [ ] Display payer, receiver, amount, date, notes, and creator where useful.
+- [ ] Define and enforce edit/delete rules, or explicitly make settlements immutable for MVP.
+- [ ] Show loading, retryable error, and empty states.
+
+### Phase 11 verification
+
+- [ ] Acceptance Scenario 6 — Settlement moves both balances toward zero exactly.
+- [ ] Verify household spending, daily spending, and monthly budget are unchanged.
+- [ ] Verify unrelated users and disallowed participants cannot create or modify settlements.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 12 — Home dashboard and main navigation
+
+### Feature: Main Expo Router navigation
+
+- [ ] Create authenticated bottom tabs for Home, Expenses, Balances, and Settings.
+- [ ] Add stack/modal routes for add expense, expense details/edit, settle up, workspace onboarding, members, invites, and budget management.
+- [ ] Ensure back behavior and deep links work on Android and iOS.
+- [ ] Keep protected routes behind the auth/workspace guard.
+- [ ] Use accessible tab labels/icons and safe-area handling.
+
+### Feature: Home dashboard
+
+- [ ] Show the active workspace name.
+- [ ] Show the current month budget card with spent, total budget, remaining/overage, and progress.
+- [ ] Show today's spending derived from expenses for the device's local date.
+- [ ] Show the authenticated user's current balance in plain language.
+- [ ] Show a prominent Add Expense quick action.
+- [ ] Show recent expense and settlement activity.
+- [ ] Keep analytics intentionally limited to the MVP questions.
+- [ ] Avoid duplicate/N+1 requests and fetch dashboard data efficiently.
+
+### Feature: Dashboard states and refresh
+
+- [ ] Show a non-blank loading state while essential data loads.
+- [ ] Show partial-section recovery when one dashboard request fails.
+- [ ] Support manual refresh/retry.
+- [ ] Show tailored no-expense, no-budget, no-balance, and no-other-members states.
+- [ ] Refresh after expense, settlement, budget, and membership changes.
+
+### Phase 12 verification
+
+- [ ] Dashboard answers spending, budget remaining/overage, personal balance, and recent activity at a glance.
+- [ ] Today's total supports multiple same-day expenses and local timezone boundaries.
+- [ ] Settlements appear in activity but never in spending totals.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 13 — Settings and member management
+
+### Feature: Settings screen
+
+- [ ] Add Profile, Workspace, Members, Monthly Budget, Invite Members, and Sign Out entries.
+- [ ] Hide or explain admin-only actions for regular members while retaining server enforcement.
+- [ ] Keep settings navigation and content intentionally simple.
+
+### Feature: Profile settings
+
+- [ ] Show and edit display name.
+- [ ] Show avatar or initials fallback; keep avatar upload out of scope unless storage is deliberately configured.
+- [ ] Validate input and handle save loading/errors.
+- [ ] Refresh member displays after profile changes.
+
+### Feature: Workspace settings
+
+- [ ] Show workspace name and currency.
+- [ ] Allow admins to update the workspace name.
+- [ ] Keep MVP currency fixed to `INR` after creation unless a safe migration/product rule is defined.
+- [ ] Enforce updates at the database layer.
+
+### Feature: Sign out
+
+- [ ] Confirm/execute sign out with a progress state.
+- [ ] Clear session-scoped cached data and active-workspace selection safely.
+- [ ] Return to the authentication flow without protected-screen flashes.
+
+### Phase 13 verification
+
+- [ ] Admin and member settings experiences reflect their permissions.
+- [ ] Profile/workspace updates appear consistently throughout the app.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 14 — Loading, error, and empty states
+
+### Feature: Request-state coverage
+
+- [ ] Audit every Supabase query for an intentional loading state.
+- [ ] Audit every query/mutation for friendly error handling.
+- [ ] Add retry/recovery where safe and useful.
+- [ ] Prevent blank screens and stuck loading indicators.
+- [ ] Prevent double-submit behavior for all financial mutations.
+- [ ] Log useful development context without secrets or sensitive records.
+- [ ] Never expose raw Postgres/Supabase error text directly to users.
+
+### Feature: Required empty states
+
+- [ ] No expenses: “No expenses yet. Add your first shared expense.”
+- [ ] No budget: “No budget set for [month]. Set a monthly budget to track your spending.”
+- [ ] Zero balance: “You're all settled up.”
+- [ ] No other members: “You're the only member here. Invite your flatmates to start splitting expenses.”
+- [ ] Adapt actions/messages appropriately for non-admin members.
+
+### Feature: Connectivity and stale data behavior
+
+- [ ] Handle transient network failures without losing entered form data.
+- [ ] Clearly distinguish loading, refreshing, stale data, and failed mutation states.
+- [ ] Prefer confirmed writes and refetches over risky optimistic financial updates.
+- [ ] Ensure failed financial writes never appear permanently successful.
+
+### Phase 14 verification
+
+- [ ] Request-state audit is complete for every screen and mutation.
+- [ ] Offline/transient-error manual checks preserve data integrity.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 15 — Validation, security, accessibility, and edge cases
+
+### Feature: Form validation audit
+
+- [ ] Expense: required title, required payer, amount greater than zero, valid precision, and at least one participant.
+- [ ] Budget: amount greater than zero and valid precision.
+- [ ] Settlement: amount greater than zero, valid precision, and different members.
+- [ ] Workspace: non-empty normalized name.
+- [ ] Authentication: valid email and required password/OTP fields.
+- [ ] Invitations: required normalized token.
+- [ ] Match important client validations with authoritative database validations.
+
+### Feature: Financial correctness edge cases
+
+- [ ] Test one-participant expenses.
+- [ ] Test payer excluded from participants.
+- [ ] Test non-even division and deterministic remainder allocation.
+- [ ] Test decimal input, maximum supported values, and rejected over-precision.
+- [ ] Test multiple expenses, edits, deletes, and settlements in different orders.
+- [ ] Test inactive members with historical expenses and non-zero balances.
+- [ ] Test month/year boundaries and device timezone changes.
+- [ ] Test over-budget and missing-budget cases.
+- [ ] Ensure no manually stored balance, daily total, monthly spent total, or remaining-budget counter exists.
+
+### Feature: Authorization audit
+
+- [ ] Verify a Workspace A user cannot read Workspace B workspace details.
+- [ ] Verify a Workspace A user cannot read or mutate Workspace B members/invites.
+- [ ] Verify a Workspace A user cannot read or mutate Workspace B expenses/splits.
+- [ ] Verify a Workspace A user cannot read or mutate Workspace B budgets.
+- [ ] Verify a Workspace A user cannot read or mutate Workspace B settlements/balances.
+- [ ] Verify manually substituted IDs do not bypass RLS/RPC authorization.
+- [ ] Verify member/admin edit and delete rules for expenses.
+- [ ] Verify admin-only budget, invite, workspace, and membership mutations.
+- [ ] Verify no service-role credentials ship in the app bundle.
+
+### Feature: Accessibility and usability audit
+
+- [ ] Add accessible names/roles/hints to interactive elements.
+- [ ] Verify touch target sizes and screen-reader navigation.
+- [ ] Verify positive/negative states do not rely on color alone.
+- [ ] Verify text scaling and large financial amounts do not break critical layouts.
+- [ ] Verify keyboard avoidance, focus order, input types, and submit behavior.
+- [ ] Verify Android back behavior and iOS gestures.
+- [ ] Verify light/dark mode contrast if both modes are enabled.
+
+### Phase 15 verification
+
+- [ ] Acceptance Scenario 8 — Authorization passes at the database layer.
+- [ ] All financial/date edge-case tests pass.
+- [ ] Accessibility audit has no critical issues.
+- [ ] TypeScript passes.
+- [ ] Lint passes.
+
+## Phase 16 — Tests, release checks, and documentation
+
+### Feature: Automated test suite
+
+- [ ] Choose minimal Expo SDK 56-compatible unit/component test tooling.
+- [ ] Add unit tests for money parsing/formatting and split allocation.
+- [ ] Add unit tests for date/month utilities.
+- [ ] Add tests for balance and budget response mapping/presentation.
+- [ ] Add component/form tests for required validation and states.
+- [ ] Add database tests for migrations, constraints, RPCs, atomicity, and RLS.
+- [ ] Add integration or scripted acceptance tests for the eight required scenarios.
+- [ ] Add test scripts to `package.json`.
+
+### Feature: Performance and reliability
+
+- [ ] Check dashboard and history queries for duplicate requests and N+1 patterns.
+- [ ] Verify required indexes are used for expected workspace-scale queries.
+- [ ] Verify expense history pagination remains stable.
+- [ ] Confirm normal refetching is reliable before considering optional Realtime.
+- [ ] Add Realtime only if it does not complicate or delay the working MVP.
+
+### Feature: README and developer setup
+
+- [ ] Replace the starter README with the Flatdues project overview.
+- [ ] Document the tech stack and prerequisites.
+- [ ] Document environment variables and the prohibition on service-role keys in the app.
+- [ ] Document Supabase project setup and authentication configuration.
+- [ ] Document applying/resetting migrations and generating database types.
+- [ ] Document installing dependencies and starting Expo.
+- [ ] Document Android and iOS run instructions.
+- [ ] Document tests, lint, and TypeScript commands.
+- [ ] Document architecture and data-access decisions.
+- [ ] Document the database model and financial derivation rules.
+- [ ] Document any platform limitations or manual configuration.
+
+### Feature: Final acceptance scenarios
+
+- [ ] Scenario 1 — A new user signs up, creates “Flat 302,” becomes admin, and reaches the dashboard.
+- [ ] Scenario 2 — An admin generates an invite and four users join, producing five active members.
+- [ ] Scenario 3 — ₹1,000 paid by Adil across five members creates ₹200 splits; balances are +₹800/-₹200 and sum to ₹0.
+- [ ] Scenario 4 — ₹600 shared only by Adil, Aman, and Ali creates three ₹200 splits and no shares for others.
+- [ ] Scenario 5 — A ₹20,000 budget and ₹1,000 expense show ₹1,000 spent and ₹19,000 remaining; settlement does not change either.
+- [ ] Scenario 6 — Aman settling ₹200 to Adil moves both balances toward zero without changing spending or budget.
+- [ ] Scenario 7 — Deactivating a member preserves historical splits and defaults new expenses to the four active members.
+- [ ] Scenario 8 — Cross-workspace reads and writes fail even when IDs are manually changed.
+
+### Feature: Final quality gate
+
+- [ ] Run the complete automated test suite successfully.
+- [ ] Run a clean TypeScript check successfully.
+- [ ] Run lint successfully with no ignored new errors.
+- [ ] Apply/reset Supabase migrations successfully from a clean database.
+- [ ] Verify no secrets, dead code, unnecessary `any`, duplicate financial formulas, or raw screen-level Supabase queries remain.
+- [ ] Verify Android behavior on a development build or representative device/emulator.
+- [ ] Verify iOS behavior on a development build or representative device/simulator.
+- [ ] Walk through every acceptance scenario using concrete records and record results.
+- [ ] Confirm financial correctness and database authorization before declaring the MVP complete.
+
+## Explicitly deferred V1 non-goals
+
+These are guardrails, not incomplete MVP work. Do not add them unless the product scope changes explicitly.
+
+- AI features or OCR receipt scanning
+- Bank integrations, payment gateways, or automatic UPI payments
+- Recurring expenses
+- Advanced statistics or debt optimization
+- Receipt image storage
+- Chat/comments or push notifications
+- Per-category or carry-forward budgets
+- Multiple currencies inside one workspace
+- Offline-first synchronization
+- Web administration dashboard
