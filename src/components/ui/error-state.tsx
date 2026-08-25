@@ -1,8 +1,10 @@
 import type { StyleProp, ViewStyle } from "react-native";
 import { StyleSheet, View } from "react-native";
 
+import { icons } from "@/lib/icons";
 import { spacing } from "@/theme";
 
+import { AppIcon } from "./app-icon";
 import { AppText } from "./app-text";
 import { Button } from "./button";
 
@@ -21,6 +23,7 @@ export function ErrorState({
 }: ErrorStateProps) {
   return (
     <View accessibilityLiveRegion="polite" style={[styles.container, style]}>
+      <AppIcon icon={icons.states.error} size="xlarge" tone="negative" />
       <View style={styles.copy}>
         <AppText accessibilityRole="header" variant="heading">
           {title}
@@ -28,7 +31,11 @@ export function ErrorState({
         <AppText tone="muted">{description}</AppText>
       </View>
       {onRetry ? (
-        <Button onPress={onRetry} variant="secondary">
+        <Button
+          leadingIcon={icons.actions.refresh}
+          onPress={onRetry}
+          variant="secondary"
+        >
           Try again
         </Button>
       ) : null}

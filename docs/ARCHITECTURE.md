@@ -6,7 +6,7 @@
 - Expo Router owns navigation. SDK 56 application code imports navigation APIs from `expo-router`, not external `@react-navigation/*` packages.
 - TypeScript stays in strict mode and all application imports may use the existing `@/*` alias.
 - Existing Expo-compatible packages are retained. No additional UI framework is required for the design system.
-- Hugeicons is the only in-app icon system. Use `@hugeicons/react-native` with named icons from `@hugeicons/core-free-icons`; do not introduce Expo Symbols, vector-icon packs, emoji glyphs, or one-off SVG icons for interface actions.
+- Hugeicons is the only in-app icon system. Use `@hugeicons/react-native` with individual icon subpath imports from `@hugeicons/core-free-icons`; do not introduce Expo Symbols, vector-icon packs, emoji glyphs, or one-off SVG icons for interface actions.
 - `@gorhom/bottom-sheet` is the only modal-overlay primitive. Do not import or render React Native `Modal`, Expo UI BottomSheet, or another sheet/modal library for application flows.
 - Windows can build and bundle Android locally, but an iOS simulator/build requires macOS or EAS Build.
 - Financial totals are derived from expenses, immutable expense splits, and settlements; they are never stored as mutable balance or spending counters.
@@ -69,7 +69,7 @@ UI primitives remain domain-neutral. Formatting a value is allowed in `MoneyText
 
 - Install `@hugeicons/react-native`, `@hugeicons/core-free-icons`, and its required `react-native-svg` peer using Expo-compatible versions.
 - Render interface icons through a shared `AppIcon` primitive. The wrapper owns semantic sizes, theme colors, the default stroke width, and decorative/accessibility behavior.
-- Import only the individual icons a screen needs from `@hugeicons/core-free-icons`. Wildcard imports are prohibited because they prevent effective tree-shaking.
+- Import only the individual icons the central registry needs through package subpaths such as `@hugeicons/core-free-icons/Home01Icon`. The package barrel and wildcard imports are prohibited: Metro attempted to traverse thousands of barrel modules and exhausted Windows file handles during the Phase 1 production export.
 - Use Hugeicons for tab icons, navigation actions, buttons, inputs, empty/error states, settings rows, categories, filters, member actions, budget actions, expense actions, settlement actions, and all other interface iconography.
 - Meaningful icon-only controls require an accessible label on their enclosing pressable. Decorative icons are hidden from the accessibility tree when adjacent text already provides the label.
 - App icon, splash art, member avatars, and user-supplied images are branded/content imagery rather than interface icons and are not replaced by Hugeicons.

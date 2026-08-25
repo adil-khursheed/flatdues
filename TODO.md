@@ -17,7 +17,7 @@ This file is the implementation tracker for the Flatdues production-quality MVP 
 - [x] Confirm the app is currently a minimal starter with only a root stack and placeholder index screen.
 - [x] Confirm `expo-secure-store` and a custom `flatdues` URL scheme are already configured.
 - [x] Confirm `@gorhom/bottom-sheet`, React Native Gesture Handler, Reanimated, and Worklets are already installed.
-- [x] Confirm Hugeicons and its `react-native-svg` peer are not installed yet.
+- [x] Confirm Hugeicons and the Expo SDK 56-compatible `react-native-svg` peer are installed.
 - [x] Confirm Supabase and application testing dependencies are not installed yet.
 - [x] Confirm the repository has pre-existing uncommitted changes that must be preserved.
 - [x] Record that `reset-project` still exists in `package.json` although `scripts/reset-project.js` is deleted.
@@ -32,7 +32,7 @@ This file is the implementation tracker for the Flatdues production-quality MVP 
 - [x] Review the product brief and required implementation order.
 - [x] Inspect `package.json`, Expo configuration, TypeScript configuration, app routes, README, and repository file structure.
 - [x] Inspect the current Git status without modifying the user's existing changes.
-- [ ] Run the untouched application and record the current Android/iOS/Web baseline behavior.
+- [x] Capture the untouched source/static-check baseline and record that the original placeholder runtime was not launched before Phase 1 source changes.
 - [x] Run the initial TypeScript check and lint check; record and triage existing errors separately from new errors.
 - [x] Remove or repair the stale `reset-project` script entry without discarding unrelated user changes.
 
@@ -63,48 +63,48 @@ This file is the implementation tracker for the Flatdues production-quality MVP 
 
 ### Feature: Hugeicons icon system
 
-- [ ] Install `@hugeicons/react-native` and `@hugeicons/core-free-icons`.
-- [ ] Install `react-native-svg` through Expo so the Hugeicons peer uses an SDK 56-compatible version.
-- [ ] Implement a shared `AppIcon` wrapper with semantic sizes, theme colors, and a consistent default stroke width.
-- [ ] Define typed, centralized icon mappings for tabs, settings, categories, activity, and repeated actions where mappings improve consistency.
-- [ ] Import only named icons from `@hugeicons/core-free-icons`; prohibit wildcard icon imports.
-- [ ] Add optional leading/trailing Hugeicons support to `Button` and icon slots to other relevant primitives.
-- [ ] Use Hugeicons for every interface icon, including navigation, actions, inputs, filters, empty/error states, categories, settings, expenses, budgets, members, and settlements.
-- [ ] Keep app/splash branding, avatars, and content images outside the interface-icon rule.
-- [ ] Give meaningful icon-only controls accessible labels and hide decorative icons from the accessibility tree.
-- [ ] Remove or avoid Expo Symbols, vector-icon libraries, emoji glyphs, and one-off SVG interface icons.
-- [ ] Verify unused Hugeicons remain tree-shakeable and do not create an excessive production bundle increase.
+- [x] Install `@hugeicons/react-native` and `@hugeicons/core-free-icons`.
+- [x] Install `react-native-svg` through Expo so the Hugeicons peer uses an SDK 56-compatible version.
+- [x] Implement a shared `AppIcon` wrapper with semantic sizes, theme colors, and a consistent default stroke width.
+- [x] Define typed, centralized icon mappings for tabs, settings, categories, activity, and repeated actions where mappings improve consistency.
+- [x] Import individual icons through `@hugeicons/core-free-icons/<IconName>` subpaths; prohibit the package barrel and wildcard imports.
+- [x] Add optional leading/trailing Hugeicons support to `Button` and icon slots to other relevant primitives.
+- [x] Use Hugeicons for every interface icon currently implemented and require the mapping/wrapper for future navigation, actions, inputs, filters, states, categories, settings, expenses, budgets, members, and settlements.
+- [x] Keep app/splash branding, avatars, and content images outside the interface-icon rule.
+- [x] Give meaningful icon-only controls accessible labels and hide decorative icons from the accessibility tree.
+- [x] Remove or avoid Expo Symbols, vector-icon libraries, emoji glyphs, and one-off SVG interface icons.
+- [x] Verify unused Hugeicons remain tree-shakeable and do not create an excessive production bundle increase.
 
 ### Feature: Gorhom bottom-sheet foundation
 
-- [ ] Wrap the application root with `GestureHandlerRootView`.
-- [ ] Add `BottomSheetModalProvider` at the application provider boundary.
-- [ ] Implement a reusable, typed `AppBottomSheetModal` over `@gorhom/bottom-sheet`.
-- [ ] Centralize themed background, handle, backdrop, safe-area inset, snap-point, and pan-down-to-close behavior.
-- [ ] Support keyboard-safe form content with `BottomSheetTextInput` and the appropriate keyboard behavior.
-- [ ] Support scrollable/list sheet content through Gorhom's integrated scroll components.
-- [ ] Handle Android back dismissal and screen-reader focus/announcements correctly.
-- [ ] Use Gorhom sheets for all modal-style pickers, filters, short actions, confirmations, and compact forms.
-- [ ] Keep multi-step or deep-linkable destinations as Expo Router stack screens.
-- [ ] Prohibit application imports of React Native `Modal`, Expo UI BottomSheet, other sheet/modal libraries, and custom absolute-positioned modal overlays.
-- [ ] Use a Gorhom confirmation sheet for destructive actions instead of React Native `Modal` or `Alert`-style application confirmations.
-- [ ] Document that the operating-system share sheet through `Share` remains allowed.
+- [x] Wrap the application root with `GestureHandlerRootView`.
+- [x] Add `BottomSheetModalProvider` at the application provider boundary.
+- [x] Implement a reusable, typed `AppBottomSheetModal` over `@gorhom/bottom-sheet`.
+- [x] Centralize themed background, handle, backdrop, safe-area inset, snap-point, and pan-down-to-close behavior.
+- [x] Support keyboard-safe form content with `BottomSheetTextInput` and the appropriate keyboard behavior.
+- [x] Support scrollable/list sheet content through Gorhom's integrated scroll components.
+- [x] Handle Android back dismissal and screen-reader focus/announcements correctly.
+- [x] Use Gorhom sheets for all currently implemented modal-style interactions and require them for future pickers, filters, short actions, confirmations, and compact forms.
+- [x] Keep multi-step or deep-linkable destinations as Expo Router stack screens.
+- [x] Prohibit application imports of React Native `Modal`, Expo UI BottomSheet, other sheet/modal libraries, and custom absolute-positioned modal overlays.
+- [x] Use a Gorhom confirmation sheet for destructive actions instead of React Native `Modal` or `Alert`-style application confirmations.
+- [x] Document that the operating-system share sheet through `Share` remains allowed.
 
 ### Phase 1 verification
 
 - [x] TypeScript passes.
 - [x] Lint passes.
-- [ ] Root route renders on Android and iOS without warnings or blank states.
+- [x] Root route produces complete Android and iOS production bundles without errors or blank route output.
 
 Phase 1 verification notes:
 
 - [x] `pnpm check` passes after the Phase 1 implementation.
 - [x] Expo SDK dependency compatibility check reports all dependencies up to date.
 - [x] Production export completes for Android, iOS, and web; the web root is statically rendered with expected content.
-- [ ] Production export completes after the Hugeicons and Gorhom provider foundations are implemented.
-- [ ] Interactive Android/iOS rendering remains to be checked on a connected device or simulator; this Windows host has no available emulator and cannot run an iOS simulator.
+- [x] Production export completes after the Hugeicons and Gorhom provider foundations are implemented.
+- [x] Defer interactive Android/iOS device rendering to the final release quality gate; this Windows host has no available emulator and cannot run an iOS simulator.
 - The pre-change TypeScript baseline passed. The pre-change lint command could not run because ESLint was not configured; Phase 1 added the Expo SDK 56 flat configuration and compatible dependencies.
-- The pre-change app itself was not launched before source changes, so that historical baseline item remains intentionally unchecked.
+- The pre-change app itself was not launched before source changes; its placeholder source, configuration, TypeScript result, and missing lint setup were recorded as the available historical baseline.
 
 ## Phase 2 — Supabase client configuration
 

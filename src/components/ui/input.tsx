@@ -6,8 +6,10 @@ import type {
 } from "react-native";
 import { StyleSheet, TextInput, View } from "react-native";
 
+import type { AppIconData } from "@/lib/icons";
 import { radii, spacing, typography, useAppTheme } from "@/theme";
 
+import { AppIcon } from "./app-icon";
 import { AppText } from "./app-text";
 
 export type InputProps = TextInputProps & {
@@ -15,6 +17,8 @@ export type InputProps = TextInputProps & {
   error?: string;
   hint?: string;
   label?: string;
+  leadingIcon?: AppIconData;
+  trailingIcon?: AppIconData;
 };
 
 export function Input({
@@ -24,9 +28,11 @@ export function Input({
   error,
   hint,
   label,
+  leadingIcon,
   onBlur,
   onFocus,
   style,
+  trailingIcon,
   ...props
 }: InputProps) {
   const { colors } = useAppTheme();
@@ -45,18 +51,9 @@ export function Input({
   return (
     <View style={[styles.container, containerStyle]}>
       {label ? <AppText variant="label">{label}</AppText> : null}
-      <TextInput
-        accessibilityLabel={accessibilityLabel ?? label}
-        accessibilityState={{ disabled: !editable }}
-        editable={editable}
-        onBlur={handleBlur}
-        onFocus={handleFocus}
-        placeholderTextColor={colors.textMuted}
-        selectionColor={colors.accent}
-        {...props}
+      <View
         style={[
-          styles.input,
-          typography.body,
+          styles.inputFrame,
           {
             backgroundColor: colors.surface,
             borderColor: error
@@ -64,12 +61,36 @@ export function Input({
               : isFocused
                 ? colors.focus
                 : colors.border,
-            color: colors.text,
           },
           !editable && styles.disabled,
-          style,
         ]}
-      />
+      >
+        {leadingIcon ? (
+          <AppIcon
+            icon={leadingIcon}
+            size="small"
+            tone={error ? "negative" : "muted"}
+          />
+        ) : null}
+        <TextInput
+          accessibilityLabel={accessibilityLabel ?? label}
+          accessibilityState={{ disabled: !editable }}
+          editable={editable}
+          onBlur={handleBlur}
+          onFocus={handleFocus}
+          placeholderTextColor={colors.textMuted}
+          selectionColor={colors.accent}
+          {...props}
+          style={[styles.input, typography.body, { color: colors.text }, style]}
+        />
+        {trailingIcon ? (
+          <AppIcon
+            icon={trailingIcon}
+            size="small"
+            tone={error ? "negative" : "muted"}
+          />
+        ) : null}
+      </View>
       {error ? (
         <AppText accessibilityLiveRegion="polite" tone="negative" variant="caption">
           {error}
@@ -91,10 +112,17 @@ const styles = StyleSheet.create({
     opacity: 0.56,
   },
   input: {
+    flex: 1,
+    minHeight: 50,
+    paddingVertical: spacing.sm,
+  },
+  inputFrame: {
+    alignItems: "center",
     borderRadius: radii.md,
     borderWidth: 1,
+    flexDirection: "row",
+    gap: spacing.sm,
     minHeight: 52,
     paddingHorizontal: spacing.md,
-    paddingVertical: spacing.sm,
   },
 });

@@ -2,8 +2,10 @@ import type { ReactNode } from "react";
 import type { PressableProps, StyleProp, TextStyle, ViewStyle } from "react-native";
 import { ActivityIndicator, Pressable, StyleSheet } from "react-native";
 
+import type { AppIconData } from "@/lib/icons";
 import { radii, spacing, useAppTheme } from "@/theme";
 
+import { AppIcon } from "./app-icon";
 import { AppText, type AppTextTone } from "./app-text";
 
 type ButtonVariant = "danger" | "ghost" | "primary" | "secondary";
@@ -12,10 +14,12 @@ type ButtonSize = "compact" | "default";
 export type ButtonProps = Omit<PressableProps, "children" | "style"> & {
   children: ReactNode;
   fullWidth?: boolean;
+  leadingIcon?: AppIconData;
   loading?: boolean;
   size?: ButtonSize;
   style?: StyleProp<ViewStyle>;
   textStyle?: StyleProp<TextStyle>;
+  trailingIcon?: AppIconData;
   variant?: ButtonVariant;
 };
 
@@ -24,10 +28,12 @@ export function Button({
   children,
   disabled = false,
   fullWidth = false,
+  leadingIcon,
   loading = false,
   size = "default",
   style,
   textStyle,
+  trailingIcon,
   variant = "primary",
   ...props
 }: ButtonProps) {
@@ -93,9 +99,29 @@ export function Button({
           size="small"
         />
       ) : (
-        <AppText tone={selectedVariant.textTone} variant="bodyStrong" style={textStyle}>
-          {children}
-        </AppText>
+        <>
+          {leadingIcon ? (
+            <AppIcon
+              icon={leadingIcon}
+              size="small"
+              tone={selectedVariant.textTone}
+            />
+          ) : null}
+          <AppText
+            tone={selectedVariant.textTone}
+            variant="bodyStrong"
+            style={textStyle}
+          >
+            {children}
+          </AppText>
+          {trailingIcon ? (
+            <AppIcon
+              icon={trailingIcon}
+              size="small"
+              tone={selectedVariant.textTone}
+            />
+          ) : null}
+        </>
       )}
     </Pressable>
   );
@@ -107,6 +133,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.md,
     borderWidth: 1,
     flexDirection: "row",
+    gap: spacing.xs,
     justifyContent: "center",
     minHeight: 48,
   },
