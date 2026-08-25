@@ -8,6 +8,10 @@ This file is the implementation tracker for the Flatdues production-quality MVP 
 - `[x]` Complete and verified
 - A feature is complete only when its implementation, validation, authorization, loading/error states, and relevant checks/tests are complete.
 - After completing an item, add a short verification note or link to the relevant file/commit when useful.
+- Every interface icon must use the shared Hugeicons mapping and `AppIcon`.
+- Every modal-style application overlay must use the shared Gorhom bottom-sheet primitives.
+- Every form must use `react-native-keyboard-controller` so it remains keyboard-height aware and scrollable: route forms use `KeyboardAwareForm`; Gorhom sheet forms use `AppBottomSheetKeyboardAwareScrollView` plus `AppBottomSheetTextInput`.
+- Every screen and fixed/sticky bottom action must keep its bottom edge inside `react-native-safe-area-context`; use shared `Screen`/inset primitives rather than device-specific padding.
 
 ## Current project constraints
 
@@ -18,7 +22,8 @@ This file is the implementation tracker for the Flatdues production-quality MVP 
 - [x] Confirm `expo-secure-store` and a custom `flatdues` URL scheme are already configured.
 - [x] Confirm `@gorhom/bottom-sheet`, React Native Gesture Handler, Reanimated, and Worklets are already installed.
 - [x] Confirm Hugeicons and the Expo SDK 56-compatible `react-native-svg` peer are installed.
-- [x] Confirm Supabase and application testing dependencies are not installed yet.
+- [x] Confirm Supabase was absent at baseline; Phase 2 installs it while application testing dependencies remain deferred.
+- [x] Confirm `react-native-keyboard-controller` and `react-native-safe-area-context` are installed at Expo SDK 56-compatible versions.
 - [x] Confirm the repository has pre-existing uncommitted changes that must be preserved.
 - [x] Record that `reset-project` still exists in `package.json` although `scripts/reset-project.js` is deleted.
 - [x] Read the exact Expo SDK 56 documentation at <https://docs.expo.dev/versions/v56.0.0/> before changing application code.
@@ -110,28 +115,47 @@ Phase 1 verification notes:
 
 ### Feature: Dependencies and environment
 
-- [ ] Install `@supabase/supabase-js` using versions compatible with Expo SDK 56.
-- [ ] Add any required React Native URL/polyfill dependency only if current Supabase guidance requires it.
-- [ ] Create `.env.example` containing `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_ANON_KEY` placeholders.
-- [ ] Confirm real secrets are ignored and no service-role key is present in mobile code or repository history.
-- [ ] Validate required public environment variables at startup and show a developer-friendly configuration error.
-- [ ] Document local environment setup.
+- [x] Install `@supabase/supabase-js` using versions compatible with Expo SDK 56.
+- [x] Add `react-native-url-polyfill` as required by current Supabase React Native guidance.
+- [x] Create `.env.example` containing `EXPO_PUBLIC_SUPABASE_URL` and the current `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`, with documented legacy `EXPO_PUBLIC_SUPABASE_ANON_KEY` fallback.
+- [x] Confirm `.env` files are ignored (except `.env.example`) and no service-role key or JWT pattern is present in mobile code or tracked repository history.
+- [x] Validate required public environment variables at startup and show a developer-friendly configuration error.
+- [x] Document local environment setup in `docs/ARCHITECTURE.md`.
 
 ### Feature: Typed Supabase client
 
-- [ ] Create a singleton, typed Supabase client.
-- [ ] Persist auth sessions with Expo SecureStore using an Expo-compatible storage adapter.
-- [ ] Configure session refresh and React Native app-state handling correctly.
-- [ ] Configure deep-link URL handling only if passwordless auth is selected.
-- [ ] Add a repeatable command/process for generating Supabase database TypeScript types.
-- [ ] Avoid untyped response casts and unnecessary `any`.
+- [x] Create a singleton, typed Supabase client.
+- [x] Persist native auth sessions with a versioned, chunked Expo SecureStore adapter; keep web preview sessions memory-only.
+- [x] Configure session refresh and React Native app-state handling correctly.
+- [x] Keep URL-session detection disabled and defer explicit deep-link handling unless Phase 4 selects passwordless auth.
+- [x] Add pinned Supabase CLI tooling and the repeatable `pnpm types:supabase` generation command.
+- [x] Avoid untyped response casts and unnecessary `any`.
+
+### Feature: Application providers, keyboard, and safe areas
+
+- [x] Mount `SafeAreaProvider` with initial window metrics at the application boundary.
+- [x] Implement shared `Screen` with all safe-area edges enabled by default, including the bottom edge.
+- [x] Mount `KeyboardProvider` from `react-native-keyboard-controller` at the application boundary.
+- [x] Implement shared, scrollable `KeyboardAwareForm` with safe-area bottom padding and focused-input keyboard offset.
+- [x] Implement the shared Gorhom/keyboard-controller aware scroll primitive for every compact bottom-sheet form.
+- [x] Mount one TanStack Query client and the native Supabase session lifecycle at the provider boundary.
+- [x] Update the current route to use `Screen`; require every future route and bottom action to preserve the safe-area bottom inset.
+- [x] Require every future route-level form to use `KeyboardAwareForm`; prohibit plain route-level form scroll/avoidance implementations.
 
 ### Phase 2 verification
 
-- [ ] TypeScript passes.
-- [ ] Lint passes.
-- [ ] Supabase client initializes with valid development environment variables.
-- [ ] Missing environment variables fail clearly without exposing secrets.
+- [x] TypeScript passes.
+- [x] Lint passes.
+- [x] Supabase client initializes with valid public development environment variables and production bundles complete for Android, iOS, and web.
+- [x] Missing environment variables statically render a clear, safe-area-aware configuration screen without exposing secrets.
+
+Phase 2 verification notes:
+
+- [x] `pnpm check` passes after the Phase 2 implementation.
+- [x] Pinned Supabase CLI `2.115.0` is available and `pnpm types:supabase` writes generated output only after a successful linked-project command.
+- [x] A missing-environment web production export renders both required variable names and the service-role warning without rendering a value.
+- [x] Synthetic valid public configuration completes Android, iOS, and web production exports, including the keyboard-controller/Gorhom integration, in `dist/phase2-final`.
+- [x] Native interactive keyboard/safe-area behavior remains part of the final Android/iOS device quality gate because this Windows host has no iOS simulator and no available Android emulator.
 
 ## Phase 3 — Database schema and Row Level Security
 
@@ -283,7 +307,7 @@ Phase 1 verification notes:
 
 ### Feature: Login and signup UI
 
-- [ ] Build the email authentication screen.
+- [ ] Build the email authentication screen with `KeyboardAwareForm` so every field and submit action remains keyboard-height aware, safe-area protected, and scrollable.
 - [ ] Use Hugeicons for meaningful authentication input/action iconography through `AppIcon`.
 - [ ] Validate email and password/OTP inputs inline.
 - [ ] Show submission loading and prevent duplicate requests.
@@ -317,7 +341,7 @@ Phase 1 verification notes:
 
 ### Feature: Create workspace
 
-- [ ] Build the create workspace form with required name validation.
+- [ ] Build the create workspace form with `KeyboardAwareForm`, safe-area-aware bottom spacing, and required name validation.
 - [ ] Call the atomic workspace creation RPC.
 - [ ] Make the creator an active admin automatically.
 - [ ] Set the default currency to `INR` without hard-coding a currency symbol into calculations.
@@ -326,7 +350,7 @@ Phase 1 verification notes:
 
 ### Feature: Join workspace
 
-- [ ] Build invite token entry/paste UI.
+- [ ] Build invite token entry/paste UI with `KeyboardAwareForm` and safe-area-aware bottom spacing.
 - [ ] Normalize token input without weakening token validation.
 - [ ] Call the secure invitation join RPC.
 - [ ] Show friendly errors for invalid, expired, exhausted, and already-member invitations.
@@ -399,7 +423,7 @@ Phase 1 verification notes:
 
 ### Feature: Add Expense form
 
-- [ ] Build fields for amount, title/description, category, date, payer, participants, and notes.
+- [ ] Build fields for amount, title/description, category, date, payer, participants, and notes inside `KeyboardAwareForm` so the long form stays keyboard-height aware, safe-area protected, and scrollable.
 - [ ] Default date to the device's current local date.
 - [ ] Default payer to the authenticated member.
 - [ ] Default participants to all active workspace members.
@@ -492,7 +516,7 @@ Phase 1 verification notes:
 
 ### Feature: Budget management
 
-- [ ] Build an admin-only monthly budget create/update form.
+- [ ] Build an admin-only monthly budget create/update form with `KeyboardAwareForm` and safe-area-aware bottom spacing.
 - [ ] Validate a positive amount inline and server-side.
 - [ ] Save the first day of the selected month as `month_start`.
 - [ ] Offer to use the previous month's budget only after explicit user confirmation.
@@ -546,7 +570,7 @@ Phase 1 verification notes:
 
 ### Feature: Settlement recording
 
-- [ ] Build Settle Up fields for paying member, receiving member, amount, date, and notes.
+- [ ] Build Settle Up fields for paying member, receiving member, amount, date, and notes inside `KeyboardAwareForm` with safe-area-aware bottom spacing.
 - [ ] Default the amount to the relevant outstanding balance where unambiguous.
 - [ ] Validate positive amount and different paying/receiving members inline and server-side.
 - [ ] Restrict member choices and allowed participation according to the final authorization model.
@@ -624,14 +648,14 @@ Phase 1 verification notes:
 
 ### Feature: Profile settings
 
-- [ ] Show and edit display name.
+- [ ] Show and edit display name in `KeyboardAwareForm` with keyboard-height-aware scrolling and safe-area bottom spacing.
 - [ ] Show avatar or initials fallback; keep avatar upload out of scope unless storage is deliberately configured.
 - [ ] Validate input and handle save loading/errors.
 - [ ] Refresh member displays after profile changes.
 
 ### Feature: Workspace settings
 
-- [ ] Show workspace name and currency.
+- [ ] Show workspace name and currency; use `KeyboardAwareForm` for editable content and keep bottom actions inside the safe area.
 - [ ] Allow admins to update the workspace name.
 - [ ] Keep MVP currency fixed to `INR` after creation unless a safe migration/product rule is defined.
 - [ ] Enforce updates at the database layer.
@@ -726,7 +750,8 @@ Phase 1 verification notes:
 - [ ] Verify touch target sizes and screen-reader navigation.
 - [ ] Verify positive/negative states do not rely on color alone.
 - [ ] Verify text scaling and large financial amounts do not break critical layouts.
-- [ ] Verify keyboard avoidance, focus order, input types, and submit behavior.
+- [ ] Verify every route-level form uses `KeyboardAwareForm`, remains scrollable at keyboard height and large text sizes, and has correct focus order, input types, and submit behavior.
+- [ ] Verify every screen, tab, sheet, and fixed/sticky bottom action respects the safe-area bottom inset on Android and iOS.
 - [ ] Verify Android back behavior and iOS gestures.
 - [ ] Verify bottom-sheet focus, announcements, dismissal gestures, backdrop behavior, and Android back handling.
 - [ ] Verify every meaningful icon-only control has an accessible label and decorative Hugeicons are hidden appropriately.
@@ -761,7 +786,7 @@ Phase 1 verification notes:
 - [ ] Add unit tests for money parsing/formatting and split allocation.
 - [ ] Add unit tests for date/month utilities.
 - [ ] Add tests for balance and budget response mapping/presentation.
-- [ ] Add component/form tests for required validation and states.
+- [ ] Add component/form tests for required validation, states, `KeyboardAwareForm` usage, keyboard-height scrolling, and safe-area bottom behavior.
 - [ ] Add component tests for `AppIcon`, accessible icon buttons, and Hugeicons theme states.
 - [ ] Add component/integration tests for bottom-sheet presentation, dismissal, confirmation, and keyboard-safe form behavior.
 - [ ] Add database tests for migrations, constraints, RPCs, atomicity, and RLS.

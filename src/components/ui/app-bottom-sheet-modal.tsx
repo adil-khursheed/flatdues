@@ -36,6 +36,7 @@ import { spacing, useAppTheme } from "@/theme";
 
 import { AppText } from "./app-text";
 import { IconButton } from "./icon-button";
+import { AppBottomSheetKeyboardAwareScrollView } from "./app-bottom-sheet-keyboard-aware-scroll-view";
 
 export type AppBottomSheetModalRef = ComponentRef<typeof BottomSheetModal>;
 
@@ -63,6 +64,7 @@ export type AppBottomSheetModalProps = Omit<
   children: ReactNode;
   contentStyle?: StyleProp<ViewStyle>;
   description?: string;
+  keyboardAware?: boolean;
   onChange?: (index: number) => void;
   onDismiss?: () => void;
   scrollable?: boolean;
@@ -86,6 +88,7 @@ export const AppBottomSheetModal = forwardRef<
     children,
     contentStyle,
     description,
+    keyboardAware = false,
     onChange,
     onDismiss,
     scrollable = false,
@@ -212,16 +215,30 @@ export const AppBottomSheetModal = forwardRef<
       topInset={insets.top}
       {...props}
     >
-      {scrollable ? (
-        <BottomSheetScrollView
+      {scrollable || keyboardAware ? (
+        keyboardAware ? (
+          <AppBottomSheetKeyboardAwareScrollView
+            accessibilityViewIsModal
+            bottomOffset={spacing.md}
+            contentContainerStyle={resolvedContentStyle}
+            importantForAccessibility="yes"
+            keyboardDismissMode="interactive"
+            keyboardShouldPersistTaps="handled"
+          >
+            {header}
+            {children}
+          </AppBottomSheetKeyboardAwareScrollView>
+        ) : (
+          <BottomSheetScrollView
           accessibilityViewIsModal
           contentContainerStyle={resolvedContentStyle}
           importantForAccessibility="yes"
           keyboardShouldPersistTaps="handled"
-        >
-          {header}
-          {children}
-        </BottomSheetScrollView>
+          >
+            {header}
+            {children}
+          </BottomSheetScrollView>
+        )
       ) : (
         <BottomSheetView
           accessibilityViewIsModal

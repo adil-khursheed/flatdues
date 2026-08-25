@@ -8,6 +8,8 @@
 - Existing Expo-compatible packages are retained. No additional UI framework is required for the design system.
 - Hugeicons is the only in-app icon system. Use `@hugeicons/react-native` with individual icon subpath imports from `@hugeicons/core-free-icons`; do not introduce Expo Symbols, vector-icon packs, emoji glyphs, or one-off SVG icons for interface actions.
 - `@gorhom/bottom-sheet` is the only modal-overlay primitive. Do not import or render React Native `Modal`, Expo UI BottomSheet, or another sheet/modal library for application flows.
+- `react-native-keyboard-controller` owns keyboard avoidance. Every route-level form must use the shared keyboard-aware, scrollable form primitive instead of a plain `ScrollView` or `KeyboardAvoidingView`.
+- `react-native-safe-area-context` owns system insets. Every screen protects its bottom edge, including tab content, forms, fixed actions, and empty/error states.
 - Windows can build and bundle Android locally, but an iOS simulator/build requires macOS or EAS Build.
 - Financial totals are derived from expenses, immutable expense splits, and settlements; they are never stored as mutable balance or spending counters.
 - Supabase RLS and authorized RPCs are the security boundary. Client-side role checks are presentation only.
@@ -32,8 +34,10 @@ src/
     settings/           Profile and workspace settings
   hooks/                Shared hooks with no feature ownership
   lib/
+    env.ts               Validated Expo public runtime configuration
     supabase/            Client construction and generated database types
     query-keys.ts        Stable remote-state cache keys
+  providers/            Root query, keyboard, safe-area, and session lifecycle
   services/             Cross-feature orchestration only
   theme/                Tokens and system color-scheme access
   types/                Truly shared domain/application types
@@ -45,7 +49,7 @@ Feature directories are public boundaries. Route files compose feature screens; 
 
 ## Remote state decision
 
-TanStack Query is beneficial because expenses, balances, budgets, dashboard totals, and activity share server records and require coordinated refresh after financial mutations. It will be installed alongside the Supabase client in Phase 2. Feature repositories will own typed Supabase calls, feature hooks will own query/mutation behavior, and screens will consume those hooks.
+TanStack Query is installed at the application provider boundary because expenses, balances, budgets, dashboard totals, and activity share server records and require coordinated refresh after financial mutations. Feature repositories own typed Supabase calls, feature hooks own query/mutation behavior, and screens consume those hooks.
 
 `src/lib/query-keys.ts` is the single key factory. Invalidations fan out as follows:
 
@@ -85,6 +89,25 @@ UI primitives remain domain-neutral. Formatting a value is allowed in `MoneyText
 - Destructive confirmations use a confirmation sheet with explicit cancel and destructive actions. Do not fall back to React Native `Modal` or a custom absolute-positioned overlay.
 - Keep sheet state local to the owning feature where possible. Avoid nested sheets and global imperative registries unless a documented cross-feature use case requires them.
 - The native share sheet invoked through React Native's `Share` API is an operating-system capability and is not replaced by Gorhom.
+
+### Keyboard-aware forms and safe areas
+
+- `SafeAreaProvider` is mounted once at the root with `initialWindowMetrics`. Route roots render the shared `Screen` primitive, whose default edges are top, right, bottom, and left. A route may opt out of an edge only when its parent navigator demonstrably owns that inset.
+- The bottom of every screen remains inside the safe area. Scroll content, tab content, sticky/floating actions, form submit controls, and loading/error/empty states must include the bottom inset; do not solve this with fixed device-specific padding.
+- `KeyboardProvider` is mounted once at the root. Every route-level form renders `KeyboardAwareForm`, which wraps `KeyboardAwareScrollView` from `react-native-keyboard-controller`, stays scrollable at all supported text sizes, keeps the focused field above the keyboard, and includes the bottom safe-area inset.
+- `KeyboardAwareForm` defaults to `mode="insets"`, `keyboardShouldPersistTaps="handled"`, interactive keyboard dismissal, and a consistent focused-input offset. Use `mode="layout"` only when a submit control intentionally participates in flex reflow.
+- A fixed form action may use `KeyboardStickyView`, but it must still incorporate the safe-area bottom inset and leave the form body scrollable. Plain React Native `KeyboardAvoidingView` is not the application form convention.
+- Forms inside Gorhom sheets use `AppBottomSheetTextInput` and `AppBottomSheetKeyboardAwareScrollView`, the shared Gorhom/keyboard-controller integration. Set `keyboardAware` on `AppBottomSheetModal` forms (it enables scrolling automatically); do not combine arbitrary scroll views in feature code.
+
+## Supabase client and environment
+
+- Local development copies `.env.example` to `.env.local`, then sets `EXPO_PUBLIC_SUPABASE_URL` and `EXPO_PUBLIC_SUPABASE_PUBLISHABLE_KEY`. Legacy projects may supply `EXPO_PUBLIC_SUPABASE_ANON_KEY` instead. Restart Expo after changing these values.
+- Only the public URL and publishable/legacy anon key may be embedded in the application. A service-role key is never stored in an Expo environment variable, mobile source, build profile, or client bundle.
+- `src/lib/env.ts` validates configuration before application routes mount and displays variable names and recovery guidance without echoing values.
+- `src/lib/supabase/client.ts` lazily creates one `SupabaseClient<Database>`. React Native URL behavior is polyfilled before client construction, URL-session detection remains disabled for the selected non-passwordless baseline, and Phase 4 may add explicit deep-link handling only if passwordless authentication is selected.
+- Native auth sessions use a versioned, chunked Expo SecureStore adapter so values remain below the platform item-size limit and updates commit by manifest. Web preview sessions are memory-only because browser storage cannot provide the native SecureStore guarantee.
+- The root session lifecycle starts token refresh only while a native app is active and stops it in the background. Supabase handles browser refresh behavior on web.
+- `pnpm types:supabase` regenerates `src/lib/supabase/database.types.ts` from the linked Supabase project. The checked-in Phase 2 file is only an empty generated-schema placeholder and is replaced after Phase 3 migrations.
 
 ## Data and authorization boundaries
 

@@ -1,6 +1,5 @@
 import { useRef } from "react";
 import { ScrollView, StyleSheet, View } from "react-native";
-import { SafeAreaView } from "react-native-safe-area-context";
 
 import {
   AppBottomSheetModal,
@@ -11,6 +10,7 @@ import {
   Button,
   Card,
   MoneyText,
+  Screen,
   SectionHeader,
 } from "@/components";
 import { icons } from "@/lib/icons";
@@ -21,7 +21,7 @@ export default function Index() {
   const foundationSheetRef = useRef<AppBottomSheetModalRef>(null);
 
   return (
-    <SafeAreaView style={[styles.safeArea, { backgroundColor: colors.background }]}>
+    <Screen>
       <ScrollView
         contentContainerStyle={styles.content}
         contentInsetAdjustmentBehavior="automatic"
@@ -117,7 +117,7 @@ export default function Index() {
           </Button>
         </View>
       </AppBottomSheetModal>
-    </SafeAreaView>
+    </Screen>
   );
 }
 
@@ -165,9 +165,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     flexWrap: "wrap",
     gap: spacing.xxs,
-  },
-  safeArea: {
-    flex: 1,
   },
   sheetIcon: {
     alignItems: "center",

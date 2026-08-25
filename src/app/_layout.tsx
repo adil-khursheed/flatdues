@@ -1,4 +1,3 @@
-import { BottomSheetModalProvider } from "@gorhom/bottom-sheet";
 import {
   DarkTheme,
   DefaultTheme,
@@ -9,6 +8,8 @@ import { StatusBar } from "expo-status-bar";
 import { StyleSheet, useColorScheme } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 
+import { AppProviders } from "@/providers/app-providers";
+
 export default function RootLayout() {
   const colorScheme = useColorScheme();
   const isDark = colorScheme === "dark";
@@ -16,10 +17,10 @@ export default function RootLayout() {
   return (
     <GestureHandlerRootView style={styles.root}>
       <ThemeProvider value={isDark ? DarkTheme : DefaultTheme}>
-        <BottomSheetModalProvider>
+        <AppProviders>
           <StatusBar style={isDark ? "light" : "dark"} />
           <Stack screenOptions={{ headerShown: false }} />
-        </BottomSheetModalProvider>
+        </AppProviders>
       </ThemeProvider>
     </GestureHandlerRootView>
   );
