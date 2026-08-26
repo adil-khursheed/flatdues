@@ -302,42 +302,49 @@ Phase 3 verification notes:
 
 ### Feature: Authentication strategy
 
-- [ ] Decide between passwordless email OTP/magic link and email/password after validating Expo/Supabase SDK 56 deep-link complexity.
-- [ ] Isolate the auth provider implementation so another provider can be added later.
-- [ ] Document the selected flow and any Supabase dashboard redirect configuration.
+- [x] Decide between passwordless email OTP/magic link and email/password after validating Expo/Supabase SDK 56 deep-link complexity.
+- [x] Isolate the auth provider implementation so another provider can be added later.
+- [x] Document the selected flow and any Supabase dashboard redirect configuration.
 
 ### Feature: Session lifecycle
 
-- [ ] Create an auth provider/hook with initial session loading, signed-in, and signed-out states.
-- [ ] Restore persisted sessions securely on application launch.
-- [ ] Refresh sessions while the app is active and stop refresh behavior appropriately in the background.
-- [ ] Handle expired/revoked sessions and sign-out cleanup.
-- [ ] Ensure the profile row exists after first authentication.
+- [x] Create an auth provider/hook with initial session loading, signed-in, and signed-out states.
+- [x] Restore persisted sessions securely on application launch.
+- [x] Refresh sessions while the app is active and stop refresh behavior appropriately in the background.
+- [x] Handle expired/revoked sessions and sign-out cleanup.
+- [x] Ensure the profile row exists after first authentication.
 
 ### Feature: Login and signup UI
 
-- [ ] Build the email authentication screen with `KeyboardAwareForm` so every field and submit action remains keyboard-height aware, safe-area protected, and scrollable.
-- [ ] Use Hugeicons for meaningful authentication input/action iconography through `AppIcon`.
-- [ ] Validate email and password/OTP inputs inline.
-- [ ] Show submission loading and prevent duplicate requests.
-- [ ] Translate Supabase authentication errors into understandable user messages.
-- [ ] Handle confirmation/magic-link return state if required.
-- [ ] Provide retry and navigation between login/signup states.
+- [x] Build the email authentication screen with `KeyboardAwareForm` so every field and submit action remains keyboard-height aware, safe-area protected, and scrollable.
+- [x] Use Hugeicons for meaningful authentication input/action iconography through `AppIcon`.
+- [x] Validate email and password/OTP inputs inline.
+- [x] Show submission loading and prevent duplicate requests.
+- [x] Translate Supabase authentication errors into understandable user messages.
+- [x] Handle confirmation/magic-link return state if required.
+- [x] Provide retry and navigation between login/signup states.
 
 ### Feature: Auth routing guard
 
-- [ ] Route unauthenticated users to authentication.
-- [ ] Route authenticated users with no active workspace membership to onboarding.
-- [ ] Route authenticated users with a workspace membership to the main app.
-- [ ] Show a loading state while session and membership are being resolved.
-- [ ] Prevent protected screens from briefly rendering during resolution.
+- [x] Route unauthenticated users to authentication.
+- [x] Route authenticated users with no active workspace membership to onboarding.
+- [x] Route authenticated users with a workspace membership to the main app.
+- [x] Show a loading state while session and membership are being resolved.
+- [x] Prevent protected screens from briefly rendering during resolution.
 
 ### Phase 4 verification
 
 - [ ] Sign up, sign in, app restart/session restore, expired session, and sign out work on Android.
 - [ ] Sign up, sign in, app restart/session restore, expired session, and sign out work on iOS.
-- [ ] TypeScript passes.
-- [ ] Lint passes.
+- [x] TypeScript passes.
+- [x] Lint passes.
+
+Phase 4 verification notes:
+
+- [x] Selected email/password authentication; no native deep-link callback or Supabase mobile redirect allow-list entry is required.
+- [x] `pnpm check` passes after the Phase 4 implementation.
+- [x] Android and iOS production bundles complete with the guarded route groups; web static export also completes and includes the root, sign-in, onboarding, and home routes.
+- [ ] Native interactive authentication, SecureStore restart restoration, revoked-session handling, keyboard behavior, and sign-out remain device quality gates because this Windows host has no available Android emulator and cannot run an iOS simulator.
 
 ## Phase 5 — Workspace create/join flow
 

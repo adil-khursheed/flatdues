@@ -8,8 +8,7 @@ import {
 } from "react-native-safe-area-context";
 
 import { ConfigurationGate } from "@/components/configuration-gate";
-
-import { SupabaseSessionLifecycle } from "./supabase-session-lifecycle";
+import { AuthProvider } from "@/features/auth";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,8 +27,9 @@ export function AppProviders({ children }: PropsWithChildren) {
       <KeyboardProvider>
         <QueryClientProvider client={queryClient}>
           <ConfigurationGate>
-            <SupabaseSessionLifecycle />
-            <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+            <AuthProvider>
+              <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+            </AuthProvider>
           </ConfigurationGate>
         </QueryClientProvider>
       </KeyboardProvider>

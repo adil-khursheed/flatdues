@@ -21,6 +21,9 @@ import InboxIcon from "@hugeicons/core-free-icons/InboxIcon";
 import InformationCircleIcon from "@hugeicons/core-free-icons/InformationCircleIcon";
 import Invoice01Icon from "@hugeicons/core-free-icons/Invoice01Icon";
 import Logout01Icon from "@hugeicons/core-free-icons/Logout01Icon";
+import LockPasswordIcon from "@hugeicons/core-free-icons/LockPasswordIcon";
+import Login01Icon from "@hugeicons/core-free-icons/Login01Icon";
+import Mail01Icon from "@hugeicons/core-free-icons/Mail01Icon";
 import Money01Icon from "@hugeicons/core-free-icons/Money01Icon";
 import MoneyExchange01Icon from "@hugeicons/core-free-icons/MoneyExchange01Icon";
 import MoreHorizontalIcon from "@hugeicons/core-free-icons/MoreHorizontalIcon";
@@ -94,6 +97,12 @@ export const icons = {
     members: UserGroupIcon,
     profile: UserIcon,
     workspace: Building03Icon,
+  } satisfies IconMap,
+  auth: {
+    email: Mail01Icon,
+    password: LockPasswordIcon,
+    signIn: Login01Icon,
+    user: UserIcon,
   } satisfies IconMap,
 } as const;
 

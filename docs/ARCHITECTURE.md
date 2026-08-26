@@ -153,6 +153,41 @@ UI primitives remain domain-neutral. Formatting a value is allowed in `MoneyText
 
 Multi-table financial writes use database transactions/RPCs. Client input is never trusted for membership, payer, participant, split-total, invitation, or admin validation.
 
+## Authentication
+
+Phase 4 uses Supabase email/password authentication. This keeps the native flow
+inside the app and avoids adding passwordless callback handling before the product
+needs it. The decision follows the Expo SDK 56 Router model: route groups are
+guarded with `Stack.Protected`, and the root renders a loading or recovery state
+until both the persisted session and active workspace membership are resolved.
+Protected content is never used as a loading placeholder.
+
+`src/features/auth/auth-repository.ts` is the Supabase-specific boundary. The auth
+context exposes provider-neutral sign-in, sign-up, sign-out, and account-resolution
+operations so another identity provider can be added without coupling screens or
+routes to Supabase calls. Native sessions continue to use the versioned SecureStore
+adapter; web preview sessions remain memory-only. The provider starts token refresh
+while a native app is active, stops it in the background, reacts to signed-out or
+revoked sessions, and clears session-scoped TanStack Query data on sign-out.
+
+The Phase 3 `on_auth_user_created` database trigger creates the profile in the same
+transaction as the auth user. Sign-up supplies `display_name` as user metadata, and
+account resolution verifies that the profile is present before admitting the user
+to onboarding or the app.
+
+Supabase Dashboard setup for this flow:
+
+- Enable the Email provider and password sign-ins.
+- Decide whether Confirm email is required for the target environment. When it is
+  enabled, set the project's Site URL to a valid confirmation landing page. After
+  confirming in the browser, the user returns to Flatdues and signs in.
+- No `flatdues://` redirect URL or Expo deep-link callback is required for the
+  selected email/password flow. `detectSessionInUrl` therefore remains disabled.
+
+The implementation was checked against the exact
+[Expo SDK 56 reference](https://docs.expo.dev/versions/v56.0.0/) and uses the SDK 56
+Expo Router package APIs rather than imports from external React Navigation packages.
+
 ## Verification cadence
 
 Run `pnpm check` after each meaningful milestone. Database phases additionally reset/apply migrations and run RLS/RPC tests. Android and iOS bundles must succeed before release; visual and device checks are recorded separately so a successful bundle is not mistaken for device verification.
