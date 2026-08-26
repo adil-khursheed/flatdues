@@ -161,133 +161,142 @@ Phase 2 verification notes:
 
 ### Feature: Supabase migration foundation
 
-- [ ] Initialize/version a `supabase` project directory and migrations in the repository.
-- [ ] Add required PostgreSQL extensions using migration-safe statements.
-- [ ] Add a reusable `updated_at` trigger function.
-- [ ] Add non-recursive authorization helpers such as `is_workspace_member` and `is_workspace_admin`.
-- [ ] Ensure security-definer functions pin a safe `search_path` and perform explicit authorization.
+- [x] Initialize/version a `supabase` project directory and migrations in the repository.
+- [x] Add required PostgreSQL extensions using migration-safe statements.
+- [x] Add a reusable `updated_at` trigger function.
+- [x] Add non-recursive authorization helpers such as `is_workspace_member` and `is_workspace_admin`.
+- [x] Ensure security-definer functions pin a safe `search_path` and perform explicit authorization.
 
 ### Feature: Profiles schema
 
-- [ ] Create `profiles` with `id`, `display_name`, nullable `avatar_url`, `created_at`, and `updated_at`.
-- [ ] Reference `auth.users(id)` with the intended delete behavior.
-- [ ] Add a safe new-user profile creation trigger or an equivalent idempotent application flow.
-- [ ] Enable RLS and add read/update policies that expose only appropriate profile data.
+- [x] Create `profiles` with `id`, `display_name`, nullable `avatar_url`, `created_at`, and `updated_at`.
+- [x] Reference `auth.users(id)` with the intended delete behavior.
+- [x] Add a safe new-user profile creation trigger or an equivalent idempotent application flow.
+- [x] Enable RLS and add read/update policies that expose only appropriate profile data.
 
 ### Feature: Workspaces schema
 
-- [ ] Create `workspaces` with name, ISO currency code defaulting to `INR`, creator, and audit timestamps.
-- [ ] Validate non-empty workspace names and valid currency storage.
-- [ ] Add foreign keys and useful indexes.
-- [ ] Enable RLS so only active members can read a workspace.
-- [ ] Restrict workspace updates to active admins.
+- [x] Create `workspaces` with name, ISO currency code defaulting to `INR`, creator, and audit timestamps.
+- [x] Validate non-empty workspace names and valid currency storage.
+- [x] Add foreign keys and useful indexes.
+- [x] Enable RLS so only active members can read a workspace.
+- [x] Restrict workspace updates to active admins.
 
 ### Feature: Workspace memberships schema
 
-- [ ] Create `workspace_members` with composite uniqueness on workspace and user.
-- [ ] Constrain roles to `admin` or `member`.
-- [ ] Constrain status to `active` or `inactive`.
-- [ ] Store `joined_at` and nullable `deactivated_at` without deleting membership history.
-- [ ] Add `workspace_id, user_id` and member lookup indexes.
-- [ ] Enable RLS and prevent clients from inserting themselves into arbitrary workspaces.
-- [ ] Restrict role/status management to authorized admins while preventing unsafe removal of the last admin.
+- [x] Create `workspace_members` with composite uniqueness on workspace and user.
+- [x] Constrain roles to `admin` or `member`.
+- [x] Constrain status to `active` or `inactive`.
+- [x] Store `joined_at` and nullable `deactivated_at` without deleting membership history.
+- [x] Add `workspace_id, user_id` and member lookup indexes.
+- [x] Enable RLS and prevent clients from inserting themselves into arbitrary workspaces.
+- [x] Restrict role/status management to authorized admins while preventing unsafe removal of the last admin.
 
 ### Feature: Workspace invitations schema
 
-- [ ] Create `workspace_invites` with unique secure token, creator, expiry, maximum uses, usage count, and timestamps.
-- [ ] Validate non-negative limits/counts and prevent usage count from exceeding the maximum.
-- [ ] Add indexes for token and workspace lookups.
-- [ ] Enable RLS so only active admins can list, create, or revoke invitations.
-- [ ] Ensure raw invite lookup does not leak workspace data to unrelated users.
+- [x] Create `workspace_invites` with unique secure token, creator, expiry, maximum uses, usage count, and timestamps.
+- [x] Validate non-negative limits/counts and prevent usage count from exceeding the maximum.
+- [x] Add indexes for token and workspace lookups.
+- [x] Enable RLS so only active admins can list, create, or revoke invitations.
+- [x] Ensure raw invite lookup does not leak workspace data to unrelated users.
 
 ### Feature: Monthly budgets schema
 
-- [ ] Create `monthly_budgets` with unique workspace/month start records.
-- [ ] Enforce `amount > 0` and require `month_start` to be the first calendar day of its month.
-- [ ] Store amounts as `NUMERIC(12,2)`.
-- [ ] Add the `workspace_id, month_start` index.
-- [ ] Enable RLS for member reads and admin-only writes.
+- [x] Create `monthly_budgets` with unique workspace/month start records.
+- [x] Enforce `amount > 0` and require `month_start` to be the first calendar day of its month.
+- [x] Store amounts as `NUMERIC(12,2)`.
+- [x] Add the `workspace_id, month_start` index.
+- [x] Enable RLS for member reads and admin-only writes.
 
 ### Feature: Expenses schema
 
-- [ ] Create `expenses` with workspace, title, amount, payer, local expense date, category, notes, creator, and timestamps.
-- [ ] Enforce a non-empty title and `amount > 0` using `NUMERIC(12,2)`.
-- [ ] Validate that payer and creator relationships are compatible with the workspace model.
-- [ ] Add indexes for `(workspace_id, expense_date)` and `payer_id`.
-- [ ] Enable RLS for member reads.
-- [ ] Allow members to edit/delete only expenses they created and admins to manage any workspace expense.
-- [ ] Ensure edits cannot bypass split integrity or historical rules.
+- [x] Create `expenses` with workspace, title, amount, payer, local expense date, category, notes, creator, and timestamps.
+- [x] Enforce a non-empty title and `amount > 0` using `NUMERIC(12,2)`.
+- [x] Validate that payer and creator relationships are compatible with the workspace model.
+- [x] Add indexes for `(workspace_id, expense_date)` and `payer_id`.
+- [x] Enable RLS for member reads.
+- [x] Allow members to edit/delete only expenses they created and admins to manage any workspace expense.
+- [x] Ensure edits cannot bypass split integrity or historical rules.
 
 ### Feature: Expense splits schema
 
-- [ ] Create immutable historical `expense_splits` with unique expense/user rows.
-- [ ] Store `share_amount` as `NUMERIC(12,2)` and require a positive share.
-- [ ] Add indexes for `expense_id` and `user_id`.
-- [ ] Enable RLS through authorized access to the parent expense/workspace.
-- [ ] Prevent direct client writes that could create incomplete or mismatched split totals.
-- [ ] Ensure membership deactivation never changes historical splits.
+- [x] Create immutable historical `expense_splits` with unique expense/user rows.
+- [x] Store `share_amount` as `NUMERIC(12,2)` and require a positive share.
+- [x] Add indexes for `expense_id` and `user_id`.
+- [x] Enable RLS through authorized access to the parent expense/workspace.
+- [x] Prevent direct client writes that could create incomplete or mismatched split totals.
+- [x] Ensure membership deactivation never changes historical splits.
 
 ### Feature: Settlements schema
 
-- [ ] Create `settlements` with workspace, paying member, receiving member, amount, settlement timestamp, notes, creator, and audit timestamp.
-- [ ] Enforce `amount > 0` and `from_user_id <> to_user_id`.
-- [ ] Add the `(workspace_id, settled_at)` index.
-- [ ] Enable RLS for workspace-member reads.
-- [ ] Restrict creation/update/delete to allowed participants and authorized admins according to the final permission model.
-- [ ] Ensure settlements never mutate expenses, spending totals, or budgets.
+- [x] Create `settlements` with workspace, paying member, receiving member, amount, settlement timestamp, notes, creator, and audit timestamp.
+- [x] Enforce `amount > 0` and `from_user_id <> to_user_id`.
+- [x] Add the `(workspace_id, settled_at)` index.
+- [x] Enable RLS for workspace-member reads.
+- [x] Restrict creation/update/delete to allowed participants and authorized admins according to the final permission model.
+- [x] Ensure settlements never mutate expenses, spending totals, or budgets.
 
 ### Feature: Atomic workspace creation RPC
 
-- [ ] Create an authorized RPC that atomically inserts a workspace and its creator as an active admin.
-- [ ] Validate and normalize workspace name and default currency server-side.
-- [ ] Return the created workspace in a typed shape.
-- [ ] Prevent partial workspace creation.
+- [x] Create an authorized RPC that atomically inserts a workspace and its creator as an active admin.
+- [x] Validate and normalize workspace name and default currency server-side.
+- [x] Return the created workspace in a typed shape.
+- [x] Prevent partial workspace creation.
 
 ### Feature: Secure invitation RPCs
 
-- [ ] Create an admin-only invite generation RPC using cryptographically secure, non-predictable tokens.
-- [ ] Support optional expiry and usage limits.
-- [ ] Create an authenticated join RPC that locks/updates invite usage atomically.
-- [ ] Validate invalid, expired, exhausted, missing-workspace, and already-member cases server-side.
-- [ ] Prevent arbitrary direct membership insertion and invite race-condition overuse.
-- [ ] Return stable error codes that the app can translate into friendly messages.
+- [x] Create an admin-only invite generation RPC using cryptographically secure, non-predictable tokens.
+- [x] Support optional expiry and usage limits.
+- [x] Create an authenticated join RPC that locks/updates invite usage atomically.
+- [x] Validate invalid, expired, exhausted, missing-workspace, and already-member cases server-side.
+- [x] Prevent arbitrary direct membership insertion and invite race-condition overuse.
+- [x] Return stable error codes that the app can translate into friendly messages.
 
 ### Feature: Atomic expense RPC
 
-- [ ] Create an authenticated RPC that atomically creates an expense and exact split rows.
-- [ ] Validate caller membership, positive amount, non-empty title, valid payer, and at least one unique participant.
-- [ ] Validate participant membership according to active/historical edit rules.
-- [ ] Calculate in minor units or safe decimal arithmetic, never binary floating point.
-- [ ] Allocate rounding remainders deterministically so split rows total the expense exactly.
-- [ ] Prevent partial expenses when any validation or insert fails.
-- [ ] Define a safe atomic edit flow that preserves or replaces splits consistently.
-- [ ] Define a safe delete flow with intentional cascade/audit behavior.
+- [x] Create an authenticated RPC that atomically creates an expense and exact split rows.
+- [x] Validate caller membership, positive amount, non-empty title, valid payer, and at least one unique participant.
+- [x] Validate participant membership according to active/historical edit rules.
+- [x] Calculate in minor units or safe decimal arithmetic, never binary floating point.
+- [x] Allocate rounding remainders deterministically so split rows total the expense exactly.
+- [x] Prevent partial expenses when any validation or insert fails.
+- [x] Define a safe atomic edit flow that preserves or replaces splits consistently.
+- [x] Define a safe delete flow with intentional cascade/audit behavior.
 
 ### Feature: Balance calculation RPC
 
-- [ ] Create `get_workspace_balances(workspace_id)` with an explicit membership authorization check.
-- [ ] Return user ID, display name, paid total, share total, settlements sent, settlements received, and balance.
-- [ ] Implement `balance = paid_total - share_total - settlements_sent + settlements_received`.
-- [ ] Include inactive members when historical records give them a non-zero position.
-- [ ] Ensure all member balances sum exactly to zero at currency precision.
-- [ ] Prevent data disclosure for unrelated workspaces.
+- [x] Create `get_workspace_balances(workspace_id)` with an explicit membership authorization check.
+- [x] Return user ID, display name, paid total, share total, settlements sent, settlements received, and balance.
+- [x] Implement `balance = paid_total - share_total + settlements_sent - settlements_received` so the settlement scenarios move both participants toward zero.
+- [x] Include inactive members when historical records give them a non-zero position.
+- [x] Ensure all member balances sum exactly to zero at currency precision.
+- [x] Prevent data disclosure for unrelated workspaces.
 
 ### Feature: Spending and dashboard queries
 
-- [ ] Create efficient monthly spending data access derived only from expenses.
-- [ ] Create efficient daily spending data access derived only from expenses and a supplied local calendar date.
-- [ ] Create recent activity data access that combines expenses and settlements without treating settlements as spending.
-- [ ] Avoid N+1 profile/member queries.
+- [x] Create efficient monthly spending data access derived only from expenses.
+- [x] Create efficient daily spending data access derived only from expenses and a supplied local calendar date.
+- [x] Create recent activity data access that combines expenses and settlements without treating settlements as spending.
+- [x] Avoid N+1 profile/member queries.
 
 ### Phase 3 verification
 
-- [ ] Apply all migrations to a clean local/development Supabase database.
-- [ ] Reapply/reset migrations successfully from zero.
-- [ ] Generate fresh database TypeScript types.
-- [ ] Verify all user-facing tables have RLS enabled and expected policies.
-- [ ] Add database tests for constraints, RLS isolation, invitation races, atomic expense creation, exact rounding, and balance zero-sum behavior.
-- [ ] TypeScript passes.
-- [ ] Lint passes.
+- [x] Apply all migrations to a clean local/development Supabase database.
+- [x] Reapply/reset migrations successfully from zero.
+- [x] Generate fresh database TypeScript types.
+- [x] Verify all user-facing tables have RLS enabled and expected policies.
+- [x] Add database tests for constraints, RLS isolation, invitation races, atomic expense creation, exact rounding, and balance zero-sum behavior.
+- [x] TypeScript passes.
+- [x] Lint passes.
+
+Phase 3 verification notes:
+
+- [x] `pnpm db:reset` replays all five migrations from zero; the final lean local stack reset completed successfully twice in one run.
+- [x] `pnpm db:test` passes 54 pgTAP assertions covering schema/RLS, cross-workspace isolation, last-admin protection, serialized single-use invites, atomic expense failures/edits, deterministic rounding, inactive-member history, spending isolation, and zero-sum balances.
+- [x] `pnpm exec supabase db lint --local --level warning` reports no schema errors.
+- [x] `pnpm types:supabase:local` generated `src/lib/supabase/database.types.ts` from the reset public schema.
+- [x] `pnpm check` passes after the Phase 3 implementation.
+- The original balance checklist signs were corrected from `- sent + received` to `+ sent - received`; the original expression contradicted Scenarios 3 and 6 by moving both settlement participants farther from zero.
 
 ## Phase 4 — Authentication
 

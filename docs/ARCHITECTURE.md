@@ -14,6 +14,40 @@
 - Financial totals are derived from expenses, immutable expense splits, and settlements; they are never stored as mutable balance or spending counters.
 - Supabase RLS and authorized RPCs are the security boundary. Client-side role checks are presentation only.
 
+## Database model and local workflow
+
+The versioned Supabase project lives in `supabase/`. Apply the schema from zero with
+`pnpm db:reset`, run the pgTAP authorization and financial-integrity suite with
+`pnpm db:test`, and refresh checked-in types from the local schema with
+`pnpm types:supabase:local`. `pnpm types:supabase` remains the linked-project
+generation path. The local stack keeps Database, Auth, and API enabled; optional
+Storage, Realtime, Edge Runtime, Studio, and Analytics services are disabled because
+the MVP does not use them.
+
+All user-facing tables have RLS enabled. Active workspace membership gates reads;
+active admins manage workspace metadata, memberships, invites, and budgets. Direct
+client writes to expenses and splits are denied. Workspace creation, invite joining,
+and expense create/edit/delete operations use security-definer RPCs with an empty
+`search_path`, schema-qualified relations, explicit caller authorization, and narrow
+`authenticated` execute grants.
+
+Expense amounts and split shares use `NUMERIC(12,2)`. Equal splits are calculated in
+integer minor units, ordered by participant UUID, so a deterministic participant
+receives each rounding remainder and the shares always total the expense. Editing an
+expense replaces its splits in the same transaction; deletion intentionally cascades
+to its splits. Deactivating a membership never deletes historical expenses or splits.
+
+Balances are derived, never stored:
+
+```text
+balance = paid total - share total + settlements sent - settlements received
+```
+
+The settlement signs above are required by the product scenarios: when a debtor pays
+a creditor, the debtor's negative position increases toward zero and the creditor's
+positive position decreases toward zero. Monthly and daily spending use expenses
+only; settlements appear in recent activity but never affect spending or budgets.
+
 ## Source layout
 
 ```text
