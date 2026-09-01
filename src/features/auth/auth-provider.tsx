@@ -24,7 +24,6 @@ import {
   subscribeToAuthChanges,
 } from "./auth-repository";
 import type {
-  ActiveMembership,
   AuthContextValue,
   AuthCredentials,
   Profile,
@@ -34,7 +33,6 @@ import type {
 const AuthContext = createContext<AuthContextValue | null>(null);
 
 type ResolutionSnapshot = Readonly<{
-  activeMembership: ActiveMembership | null;
   attempt: number;
   error: string | null;
   profile: Profile | null;
@@ -54,9 +52,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
     resolution?.userId === sessionUserId &&
     resolution.attempt === resolutionAttempt;
   const profile = resolutionMatches ? resolution.profile : null;
-  const activeMembership = resolutionMatches
-    ? resolution.activeMembership
-    : null;
   const resolutionError = resolutionMatches ? resolution.error : null;
   const isResolving =
     sessionUserId !== null && (!resolutionMatches || isRetrying);
@@ -141,7 +136,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
         }
 
         setResolution({
-          activeMembership: nextResolution.activeMembership,
           attempt: resolutionAttempt,
           error: null,
           profile: nextResolution.profile,
@@ -154,7 +148,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
         }
 
         setResolution({
-          activeMembership: null,
           attempt: resolutionAttempt,
           error: getAuthErrorMessage(error, "resolve"),
           profile: null,
@@ -189,7 +182,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
       if (error) {
         if (sessionUserId) {
           setResolution({
-            activeMembership: null,
             attempt: resolutionAttempt,
             error: getAuthErrorMessage(error, "resolve"),
             profile: null,
@@ -203,7 +195,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
     } catch (error: unknown) {
       if (sessionUserId) {
         setResolution({
-          activeMembership: null,
           attempt: resolutionAttempt,
           error: getAuthErrorMessage(error, "resolve"),
           profile: null,
@@ -217,7 +208,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
 
   const value = useMemo<AuthContextValue>(
     () => ({
-      activeMembership,
       isAuthenticated: session !== null,
       isResolving,
       profile,
@@ -232,7 +222,6 @@ export function AuthProvider({ children }: PropsWithChildren) {
         : null,
     }),
     [
-      activeMembership,
       isResolving,
       profile,
       resolutionError,

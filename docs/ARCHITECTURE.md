@@ -188,6 +188,34 @@ The implementation was checked against the exact
 [Expo SDK 56 reference](https://docs.expo.dev/versions/v56.0.0/) and uses the SDK 56
 Expo Router package APIs rather than imports from external React Navigation packages.
 
+## Workspace onboarding and active selection
+
+Phase 5 keeps authentication and workspace selection separate. `AuthProvider`
+owns the session and profile, while `WorkspaceProvider` loads every active
+membership for the authenticated user, joins each membership to its workspace in
+one query, and exposes the selected workspace to route guards and features.
+
+The selected workspace ID is a versioned, user-scoped AsyncStorage preference.
+It is not an authorization claim: repositories still pass explicit workspace IDs,
+and PostgreSQL RLS/RPC checks remain authoritative. On restoration, a saved ID is
+used only when it still belongs to an active membership. Otherwise the provider
+falls back to the earliest active membership, repairs storage, or returns the user
+to onboarding when none remain. The provider retains all memberships so a future
+workspace switcher does not require a data-model change.
+
+Workspace creation and joining call only the Phase 3 `create_workspace` and
+`join_workspace_by_invite` RPCs. After the server confirms either mutation, the
+client reloads memberships before protected routing changes. If that refresh fails,
+the form retries activation without recreating a workspace or consuming the invite
+again. The create flow fixes the MVP currency to the ISO code `INR`; symbols remain
+presentation-only.
+
+After creation, an authenticated welcome route offers invite generation without
+creating an unused invite automatically. Phase 5 invite codes have no expiry and
+no usage limit. Copy/paste uses the Expo SDK 56 Clipboard package, while sharing
+uses React Native's operating-system share sheet. Tokens are never used as client
+authorization or written to logs.
+
 ## Verification cadence
 
 Run `pnpm check` after each meaningful milestone. Database phases additionally reset/apply migrations and run RLS/RPC tests. Android and iOS bundles must succeed before release; visual and device checks are recorded separately so a successful bundle is not mistaken for device verification.

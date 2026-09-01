@@ -9,6 +9,7 @@ import {
 
 import { ConfigurationGate } from "@/components/configuration-gate";
 import { AuthProvider } from "@/features/auth";
+import { WorkspaceProvider } from "@/features/workspaces";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -28,7 +29,9 @@ export function AppProviders({ children }: PropsWithChildren) {
         <QueryClientProvider client={queryClient}>
           <ConfigurationGate>
             <AuthProvider>
-              <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+              <WorkspaceProvider>
+                <BottomSheetModalProvider>{children}</BottomSheetModalProvider>
+              </WorkspaceProvider>
             </AuthProvider>
           </ConfigurationGate>
         </QueryClientProvider>

@@ -11,6 +11,7 @@ import Car01Icon from "@hugeicons/core-free-icons/Car01Icon";
 import ChartAverageIcon from "@hugeicons/core-free-icons/ChartAverageIcon";
 import CheckmarkCircle01Icon from "@hugeicons/core-free-icons/CheckmarkCircle01Icon";
 import CleaningBucketIcon from "@hugeicons/core-free-icons/CleaningBucketIcon";
+import ClipboardPasteIcon from "@hugeicons/core-free-icons/ClipboardPasteIcon";
 import Copy01Icon from "@hugeicons/core-free-icons/Copy01Icon";
 import Delete01Icon from "@hugeicons/core-free-icons/Delete01Icon";
 import Edit01Icon from "@hugeicons/core-free-icons/Edit01Icon";
@@ -62,6 +63,7 @@ export const icons = {
     forward: ArrowRight01Icon,
     invite: UserAdd01Icon,
     more: MoreHorizontalIcon,
+    paste: ClipboardPasteIcon,
     refresh: RefreshIcon,
     share: Share01Icon,
     signOut: Logout01Icon,

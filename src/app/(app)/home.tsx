@@ -1,14 +1,21 @@
+import { Redirect } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
 
 import { AppIcon, AppText, Button, Card, Screen } from "@/components";
 import { getAuthErrorMessage, useAuth } from "@/features/auth";
+import { useWorkspace } from "@/features/workspaces";
 import { icons } from "@/lib/icons";
 import { radii, spacing, useAppTheme } from "@/theme";
 
 export default function HomeRoute() {
   const { colors } = useAppTheme();
-  const { activeMembership, profile, signOut } = useAuth();
+  const { profile, signOut } = useAuth();
+  const {
+    activeMembership,
+    activeWorkspace,
+    pendingCreatedWorkspaceId,
+  } = useWorkspace();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -23,6 +30,13 @@ export default function HomeRoute() {
       setIsSigningOut(false);
     }
   };
+
+  if (
+    activeWorkspace &&
+    pendingCreatedWorkspaceId === activeWorkspace.id
+  ) {
+    return <Redirect href="/workspace-created" />;
+  }
 
   return (
     <Screen contentStyle={styles.screen}>
@@ -53,7 +67,7 @@ export default function HomeRoute() {
             authorization.
           </AppText>
           <AppText tone="muted" variant="caption">
-            Workspace: {activeMembership?.workspace_id}
+            Workspace: {activeWorkspace?.name ?? activeMembership?.workspace_id}
           </AppText>
         </Card>
 

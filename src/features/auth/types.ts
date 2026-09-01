@@ -12,15 +12,9 @@ export type SignUpCredentials = AuthCredentials &
     displayName: string;
   }>;
 
-export type ActiveMembership = Pick<
-  Database["public"]["Tables"]["workspace_members"]["Row"],
-  "role" | "user_id" | "workspace_id"
->;
-
 export type Profile = Database["public"]["Tables"]["profiles"]["Row"];
 
 export type AuthResolution = Readonly<{
-  activeMembership: ActiveMembership | null;
   profile: Profile;
 }>;
 
@@ -34,7 +28,6 @@ export type AuthUser = Readonly<{
 }>;
 
 export type AuthContextValue = Readonly<{
-  activeMembership: ActiveMembership | null;
   isAuthenticated: boolean;
   isResolving: boolean;
   profile: Profile | null;

@@ -10,27 +10,36 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 import { Button, ErrorState, LoadingState, Screen } from "@/components";
 import { useAuth } from "@/features/auth";
+import { useWorkspace } from "@/features/workspaces";
 import { icons } from "@/lib/icons";
 import { AppProviders } from "@/providers/app-providers";
 import { spacing } from "@/theme";
 
 function AuthenticatedStack() {
   const {
-    activeMembership,
     isAuthenticated,
-    isResolving,
+    isResolving: authIsResolving,
     resolutionError,
     retryResolution,
     sessionIsLoading,
     signOut,
   } = useAuth();
+  const {
+    activeMembership,
+    isResolving: workspaceIsResolving,
+    resolutionError: workspaceResolutionError,
+    retryResolution: retryWorkspaceResolution,
+  } = useWorkspace();
 
-  if (sessionIsLoading || (isAuthenticated && isResolving)) {
+  if (
+    sessionIsLoading ||
+    (isAuthenticated && (authIsResolving || workspaceIsResolving))
+  ) {
     return (
       <Screen contentStyle={styles.centered}>
         <LoadingState
           label={
-            sessionIsLoading
+            sessionIsLoading || authIsResolving
               ? "Restoring your secure session..."
               : "Loading your workspace..."
           }
@@ -46,6 +55,25 @@ function AuthenticatedStack() {
           description={resolutionError}
           onRetry={() => void retryResolution()}
           title="Account couldn't load"
+        />
+        <Button
+          leadingIcon={icons.actions.signOut}
+          onPress={() => void signOut()}
+          variant="ghost"
+        >
+          Sign out
+        </Button>
+      </Screen>
+    );
+  }
+
+  if (isAuthenticated && workspaceResolutionError) {
+    return (
+      <Screen contentStyle={styles.centered}>
+        <ErrorState
+          description={workspaceResolutionError}
+          onRetry={retryWorkspaceResolution}
+          title="Workspaces couldn't load"
         />
         <Button
           leadingIcon={icons.actions.signOut}

@@ -76,24 +76,14 @@ export async function resolveAuthenticatedUser(
   userId: string,
 ): Promise<AuthResolution> {
   const supabase = getSupabaseClient();
-  const [profileResult, membershipResult] = await Promise.all([
-    supabase.from("profiles").select("*").eq("id", userId).maybeSingle(),
-    supabase
-      .from("workspace_members")
-      .select("workspace_id, user_id, role")
-      .eq("user_id", userId)
-      .eq("status", "active")
-      .order("joined_at", { ascending: true })
-      .limit(1)
-      .maybeSingle(),
-  ]);
+  const profileResult = await supabase
+    .from("profiles")
+    .select("*")
+    .eq("id", userId)
+    .maybeSingle();
 
   if (profileResult.error) {
     throw profileResult.error;
-  }
-
-  if (membershipResult.error) {
-    throw membershipResult.error;
   }
 
   if (!profileResult.data) {
@@ -101,7 +91,6 @@ export async function resolveAuthenticatedUser(
   }
 
   return {
-    activeMembership: membershipResult.data,
     profile: profileResult.data,
   };
 }

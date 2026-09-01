@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(54);
+select plan(56);
 
 select has_table('public', 'profiles', 'profiles table exists');
 select has_table('public', 'workspaces', 'workspaces table exists');
@@ -145,6 +145,12 @@ select is(
 );
 
 select is(
+  (select currency_code from public.workspaces where id = (select id from test_context where key = 'workspace_a')),
+  'INR',
+  'workspace creation stores the normalized INR currency code'
+);
+
+select is(
   (
     select role
     from public.workspace_members
@@ -153,6 +159,17 @@ select is(
   ),
   'admin',
   'workspace creation atomically makes the creator an admin'
+);
+
+select is(
+  (
+    select status
+    from public.workspace_members
+    where workspace_id = (select id from test_context where key = 'workspace_a')
+      and user_id = '00000000-0000-4000-8000-000000000001'
+  ),
+  'active',
+  'workspace creation atomically activates the creator membership'
 );
 
 insert into test_context (key, id, token)

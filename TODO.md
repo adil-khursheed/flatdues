@@ -350,40 +350,49 @@ Phase 4 verification notes:
 
 ### Feature: Workspace onboarding
 
-- [ ] Build the onboarding choice screen with Create Workspace and Join Workspace actions.
-- [ ] Use Hugeicons consistently for Create Workspace, Join Workspace, copy, and share actions.
-- [ ] Add suitable loading, error, and signed-in user context states.
-- [ ] Prevent entry when the user is not authenticated.
+- [x] Build the onboarding choice screen with Create Workspace and Join Workspace actions.
+- [x] Use Hugeicons consistently for Create Workspace, Join Workspace, copy, and share actions.
+- [x] Add suitable loading, error, and signed-in user context states.
+- [x] Prevent entry when the user is not authenticated.
 
 ### Feature: Create workspace
 
-- [ ] Build the create workspace form with `KeyboardAwareForm`, safe-area-aware bottom spacing, and required name validation.
-- [ ] Call the atomic workspace creation RPC.
-- [ ] Make the creator an active admin automatically.
-- [ ] Set the default currency to `INR` without hard-coding a currency symbol into calculations.
-- [ ] Refresh active-workspace state and enter the new workspace.
-- [ ] Offer invite-code creation/copy/share after success.
+- [x] Build the create workspace form with `KeyboardAwareForm`, safe-area-aware bottom spacing, and required name validation.
+- [x] Call the atomic workspace creation RPC.
+- [x] Make the creator an active admin automatically.
+- [x] Set the default currency to `INR` without hard-coding a currency symbol into calculations.
+- [x] Refresh active-workspace state and enter the new workspace.
+- [x] Offer invite-code creation/copy/share after success.
 
 ### Feature: Join workspace
 
-- [ ] Build invite token entry/paste UI with `KeyboardAwareForm` and safe-area-aware bottom spacing.
-- [ ] Normalize token input without weakening token validation.
-- [ ] Call the secure invitation join RPC.
-- [ ] Show friendly errors for invalid, expired, exhausted, and already-member invitations.
-- [ ] Refresh membership/active-workspace state and enter the workspace after success.
+- [x] Build invite token entry/paste UI with `KeyboardAwareForm` and safe-area-aware bottom spacing.
+- [x] Normalize token input without weakening token validation.
+- [x] Call the secure invitation join RPC.
+- [x] Show friendly errors for invalid, expired, exhausted, and already-member invitations.
+- [x] Refresh membership/active-workspace state and enter the workspace after success.
 
 ### Feature: Active workspace foundation
 
-- [ ] Support a database model with multiple memberships even if the MVP UI selects a single active workspace.
-- [ ] Store/select the active workspace without making it an authorization mechanism.
-- [ ] Handle an inactive or deleted active-workspace selection safely.
+- [x] Support a database model with multiple memberships even if the MVP UI selects a single active workspace.
+- [x] Store/select the active workspace without making it an authorization mechanism.
+- [x] Handle an inactive or deleted active-workspace selection safely.
 
 ### Phase 5 verification
 
 - [ ] Acceptance Scenario 1 — Create Workspace passes.
 - [ ] Join flow cannot be used to insert an arbitrary membership.
-- [ ] TypeScript passes.
-- [ ] Lint passes.
+- [x] TypeScript passes.
+- [x] Lint passes.
+
+Phase 5 verification notes:
+
+- [x] `pnpm check` passes after the Phase 5 implementation.
+- [x] Android and iOS production bundles complete with the workspace provider, protected onboarding routes, Clipboard integration, and create/join flows.
+- [x] Web production export completes and statically renders the workspace setup, create, join, and post-create routes.
+- [x] Invite creation deliberately uses no expiry and no usage limit until Phase 6 adds invite management controls.
+- [ ] `pnpm db:reset` and `pnpm db:test` could not be rerun because Docker Desktop was not running; the CLI could not reach `dockerDesktopLinuxEngine` or local Postgres on port 54322.
+- [ ] Interactive create/join, clipboard, native share-sheet, keyboard, and safe-area checks remain Android/iOS device quality gates.
 
 ## Phase 6 — Members and invitations
 
