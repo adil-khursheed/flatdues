@@ -50,14 +50,10 @@ export const queryKeys = {
       ["workspaces", workspaceId, "settlements", settlementId] as const,
   },
   dashboard: {
+    all: (workspaceId: string) =>
+      ["workspaces", workspaceId, "dashboard"] as const,
     detail: (workspaceId: string, monthStart: string, localDate: string) =>
-      [
-        "workspaces",
-        workspaceId,
-        "dashboard",
-        monthStart,
-        localDate,
-      ] as const,
+      ["workspaces", workspaceId, "dashboard", monthStart, localDate] as const,
     activity: (workspaceId: string) =>
       ["workspaces", workspaceId, "activity"] as const,
   },

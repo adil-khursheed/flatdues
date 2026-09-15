@@ -7,11 +7,6 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instantiate createClient with right options
-  // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
-  __InternalSupabase: {
-    PostgrestVersion: "14.17"
-  }
   public: {
     Tables: {
       expense_splits: {
@@ -258,6 +253,7 @@ export type Database = {
           expires_at: string | null
           id: string
           max_uses: number | null
+          revoked_at: string | null
           token: string
           updated_at: string
           usage_count: number
@@ -269,6 +265,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           max_uses?: number | null
+          revoked_at?: string | null
           token?: string
           updated_at?: string
           usage_count?: number
@@ -280,6 +277,7 @@ export type Database = {
           expires_at?: string | null
           id?: string
           max_uses?: number | null
+          revoked_at?: string | null
           token?: string
           updated_at?: string
           usage_count?: number
@@ -432,6 +430,31 @@ export type Database = {
           isSetofReturn: false
         }
       }
+      create_workspace_invite: {
+        Args: {
+          p_expires_in_days: number
+          p_max_uses: number
+          p_workspace_id: string
+        }
+        Returns: {
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          revoked_at: string | null
+          token: string
+          updated_at: string
+          usage_count: number
+          workspace_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "workspace_invites"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
       delete_expense: { Args: { p_expense_id: string }; Returns: string }
       generate_workspace_invite: {
         Args: {
@@ -445,6 +468,7 @@ export type Database = {
           expires_at: string | null
           id: string
           max_uses: number | null
+          revoked_at: string | null
           token: string
           updated_at: string
           usage_count: number
@@ -508,6 +532,66 @@ export type Database = {
         SetofOptions: {
           from: "*"
           to: "workspace_members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      leave_workspace: {
+        Args: { p_workspace_id: string }
+        Returns: {
+          deactivated_at: string | null
+          joined_at: string
+          role: string
+          status: string
+          user_id: string
+          workspace_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "workspace_members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      manage_workspace_member: {
+        Args: {
+          p_role?: string
+          p_status?: string
+          p_user_id: string
+          p_workspace_id: string
+        }
+        Returns: {
+          deactivated_at: string | null
+          joined_at: string
+          role: string
+          status: string
+          user_id: string
+          workspace_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "workspace_members"
+          isOneToOne: true
+          isSetofReturn: false
+        }
+      }
+      revoke_workspace_invite: {
+        Args: { p_invite_id: string; p_workspace_id: string }
+        Returns: {
+          created_at: string
+          created_by: string
+          expires_at: string | null
+          id: string
+          max_uses: number | null
+          revoked_at: string | null
+          token: string
+          updated_at: string
+          usage_count: number
+          workspace_id: string
+        }
+        SetofOptions: {
+          from: "*"
+          to: "workspace_invites"
           isOneToOne: true
           isSetofReturn: false
         }

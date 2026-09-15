@@ -5,8 +5,12 @@ const workspaceErrorMessages: Readonly<Record<string, string>> = {
   INVITE_EXHAUSTED: "This invite code has already reached its usage limit.",
   INVITE_EXPIRED: "This invite code has expired.",
   INVITE_INVALID: "That invite code isn't valid. Check it and try again.",
-  INVITE_WORKSPACE_MISSING: "The workspace for this invite is no longer available.",
-  WORKSPACE_NAME_INVALID: "Enter a workspace name between 1 and 100 characters.",
+  INVITE_REVOKED:
+    "This invite code has been revoked by a workspace administrator.",
+  INVITE_WORKSPACE_MISSING:
+    "The workspace for this invite is no longer available.",
+  WORKSPACE_NAME_INVALID:
+    "Enter a workspace name between 1 and 100 characters.",
 };
 
 function getErrorText(error: unknown) {
@@ -28,11 +32,11 @@ function getErrorText(error: unknown) {
 
 export function getWorkspaceErrorMessage(
   error: unknown,
-  operation: "create" | "invite" | "join" | "resolve",
+  operation: "create" | "invite" | "join" | "resolve"
 ) {
   const errorText = getErrorText(error);
   const knownCode = Object.keys(workspaceErrorMessages).find((code) =>
-    errorText.includes(code),
+    errorText.includes(code)
   );
 
   if (knownCode) {

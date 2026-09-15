@@ -248,15 +248,13 @@ select set_config(
 set local role authenticated;
 
 select throws_ok(
-  $$
-    update public.workspace_members
-    set role = 'member'
-    where workspace_id = (select id from test_context where key = 'workspace_a')
-      and user_id = '00000000-0000-4000-8000-000000000001'
-  $$,
+  format(
+    'select public.leave_workspace(%L::uuid)',
+    (select id from test_context where key = 'workspace_a')
+  ),
   'P0001',
   'LAST_ACTIVE_ADMIN',
-  'the last active workspace admin cannot be demoted'
+  'the last active workspace admin cannot leave'
 );
 
 reset role;
@@ -707,10 +705,12 @@ select is(
   'recent activity combines expenses and settlements in one query'
 );
 
-update public.workspace_members
-set status = 'inactive'
-where workspace_id = (select id from test_context where key = 'workspace_a')
-  and user_id = '00000000-0000-4000-8000-000000000004';
+select public.manage_workspace_member(
+  (select id from test_context where key = 'workspace_a'),
+  '00000000-0000-4000-8000-000000000004',
+  null,
+  'inactive'
+);
 
 select is(
   (

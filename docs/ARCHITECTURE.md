@@ -87,13 +87,13 @@ TanStack Query is installed at the application provider boundary because expense
 
 `src/lib/query-keys.ts` is the single key factory. Invalidations fan out as follows:
 
-| Successful mutation | Invalidate/refetch |
-| --- | --- |
-| Expense create/edit/delete | expense list/detail, selected-month budget, balances, dashboard, activity |
-| Settlement create/edit/delete | settlement list/detail, balances, dashboard, activity |
-| Budget create/update | selected-month budget and dashboard |
-| Membership change | members, active workspace, expense-form defaults, balances, dashboard |
-| Workspace/profile update | workspace/profile, members, dashboard, settings |
+| Successful mutation           | Invalidate/refetch                                                        |
+| ----------------------------- | ------------------------------------------------------------------------- |
+| Expense create/edit/delete    | expense list/detail, selected-month budget, balances, dashboard, activity |
+| Settlement create/edit/delete | settlement list/detail, balances, dashboard, activity                     |
+| Budget create/update          | selected-month budget and dashboard                                       |
+| Membership change             | members, active workspace, expense-form defaults, balances, dashboard     |
+| Workspace/profile update      | workspace/profile, members, dashboard, settings                           |
 
 Important financial mutations wait for server confirmation before invalidation. Optimistic writes are not the default.
 
@@ -219,3 +219,39 @@ authorization or written to logs.
 ## Verification cadence
 
 Run `pnpm check` after each meaningful milestone. Database phases additionally reset/apply migrations and run RLS/RPC tests. Android and iOS bundles must succeed before release; visual and device checks are recorded separately so a successful bundle is not mistaken for device verification.
+
+## Members and invitations
+
+Phase 6 exposes protected `/members` and `/invites` stack routes before the final
+tab/settings navigation arrives. Workspace members are loaded with their profile
+name and avatar in one joined query, then partitioned into active and inactive
+sections in the client. Feature code exports an active-member selector for expense
+defaults; historical screens continue to use the complete membership list.
+
+Membership writes are RPC-only. `manage_workspace_member` lets an active admin
+promote, demote, deactivate, or reactivate another member, while
+`leave_workspace` is the only self-management path. The workspace row is locked
+during these changes and the existing trigger rejects any operation that would
+remove the last active admin. Deactivation retains the membership role and every
+historical financial row; reactivation restores that role. After self-leave, the
+client removes workspace-scoped cache data and asks `WorkspaceProvider` to select
+another active membership or return to onboarding.
+
+New invitations use `create_workspace_invite`, with expiry calculated from database
+time. The UI defaults to seven days and five joins and accepts bounded values of
+1–30 days and 1–50 joins. The older `generate_workspace_invite` RPC remains as a
+deprecated deployment-compatibility wrapper, but omitted limits now resolve to the
+same safe defaults. New application code must not call the compatibility RPC.
+
+Revocation sets `workspace_invites.revoked_at`; invitation rows are never
+hard-deleted by the mobile client. `join_workspace_by_invite` rejects revoked codes
+before checking expiry or remaining uses. Existing Phase 5 rows with nullable expiry
+or capacity remain valid legacy invitations and are labeled “No expiry” or
+“Unlimited uses” until an admin revokes them. RLS hides raw invite rows from regular
+members, and every create/revoke operation repeats active-admin authorization inside
+its security-definer RPC.
+
+Member mutations invalidate members, membership selection, balances, and dashboard
+keys. Invite creation/revocation invalidates the workspace invitation key. Realtime
+remains disabled; both management screens refetch on focus and support explicit
+pull-to-refresh.

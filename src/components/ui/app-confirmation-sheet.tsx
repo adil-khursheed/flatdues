@@ -1,10 +1,8 @@
+import { useBottomSheetModal } from "@gorhom/bottom-sheet";
 import { forwardRef, useState } from "react";
 import { StyleSheet, View } from "react-native";
-import { useBottomSheetModal } from "@gorhom/bottom-sheet";
-
 import { icons } from "@/lib/icons";
 import { spacing } from "@/theme";
-
 import {
   AppBottomSheetModal,
   type AppBottomSheetModalProps,
@@ -21,6 +19,7 @@ export type AppConfirmationSheetProps = Omit<
   confirmLabel: string;
   description: string;
   destructive?: boolean;
+  getErrorMessage?: (error: unknown) => string;
   onConfirm: () => Promise<void> | void;
   title: string;
 };
@@ -28,12 +27,14 @@ export type AppConfirmationSheetProps = Omit<
 type ConfirmationActionsProps = Pick<
   AppConfirmationSheetProps,
   "cancelLabel" | "confirmLabel" | "destructive" | "onConfirm"
->;
+> &
+  Pick<AppConfirmationSheetProps, "getErrorMessage">;
 
 function ConfirmationActions({
   cancelLabel = "Cancel",
   confirmLabel,
   destructive = false,
+  getErrorMessage,
   onConfirm,
 }: ConfirmationActionsProps) {
   const { dismiss } = useBottomSheetModal();
@@ -47,8 +48,11 @@ function ConfirmationActions({
     try {
       await onConfirm();
       dismiss();
-    } catch {
-      setError("We couldn't complete that action. Please try again.");
+    } catch (submissionError: unknown) {
+      setError(
+        getErrorMessage?.(submissionError) ??
+          "We couldn't complete that action. Please try again."
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -57,23 +61,28 @@ function ConfirmationActions({
   return (
     <View style={styles.actions}>
       {error ? (
-        <AppText accessibilityLiveRegion="polite" tone="negative" variant="caption">
+        <AppText
+          accessibilityLiveRegion="polite"
+          tone="negative"
+          variant="caption"
+        >
           {error}
         </AppText>
       ) : null}
       <Button
         disabled={isSubmitting}
         fullWidth
-        onPress={() => dismiss()}
+        onPress={() => {
+          setError(undefined);
+          dismiss();
+        }}
         variant="secondary"
       >
         {cancelLabel}
       </Button>
       <Button
         fullWidth
-        leadingIcon={
-          destructive ? icons.actions.delete : icons.actions.confirm
-        }
+        leadingIcon={destructive ? icons.actions.delete : icons.actions.confirm}
         loading={isSubmitting}
         onPress={handleConfirm}
         variant={destructive ? "danger" : "primary"}
@@ -92,10 +101,11 @@ export const AppConfirmationSheet = forwardRef<
     cancelLabel,
     confirmLabel,
     destructive,
+    getErrorMessage,
     onConfirm,
     ...sheetProps
   },
-  ref,
+  ref
 ) {
   return (
     <AppBottomSheetModal ref={ref} {...sheetProps}>
@@ -103,6 +113,7 @@ export const AppConfirmationSheet = forwardRef<
         cancelLabel={cancelLabel}
         confirmLabel={confirmLabel}
         destructive={destructive}
+        getErrorMessage={getErrorMessage}
         onConfirm={onConfirm}
       />
     </AppBottomSheetModal>

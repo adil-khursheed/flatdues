@@ -1,7 +1,6 @@
-import { Redirect } from "expo-router";
 import { useState } from "react";
 import { StyleSheet, View } from "react-native";
-
+import { Redirect, useRouter } from "expo-router";
 import { AppIcon, AppText, Button, Card, Screen } from "@/components";
 import { getAuthErrorMessage, useAuth } from "@/features/auth";
 import { useWorkspace } from "@/features/workspaces";
@@ -9,13 +8,11 @@ import { icons } from "@/lib/icons";
 import { radii, spacing, useAppTheme } from "@/theme";
 
 export default function HomeRoute() {
+  const router = useRouter();
   const { colors } = useAppTheme();
   const { profile, signOut } = useAuth();
-  const {
-    activeMembership,
-    activeWorkspace,
-    pendingCreatedWorkspaceId,
-  } = useWorkspace();
+  const { activeMembership, activeWorkspace, pendingCreatedWorkspaceId } =
+    useWorkspace();
   const [isSigningOut, setIsSigningOut] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -31,10 +28,7 @@ export default function HomeRoute() {
     }
   };
 
-  if (
-    activeWorkspace &&
-    pendingCreatedWorkspaceId === activeWorkspace.id
-  ) {
+  if (activeWorkspace && pendingCreatedWorkspaceId === activeWorkspace.id) {
     return <Redirect href="/workspace-created" />;
   }
 
@@ -42,9 +36,7 @@ export default function HomeRoute() {
     <Screen contentStyle={styles.screen}>
       <View style={styles.content}>
         <View style={styles.hero}>
-          <View
-            style={[styles.icon, { backgroundColor: colors.positiveSoft }]}
-          >
+          <View style={[styles.icon, { backgroundColor: colors.positiveSoft }]}>
             <AppIcon
               icon={icons.states.settled}
               size="xlarge"
@@ -60,15 +52,36 @@ export default function HomeRoute() {
         </View>
 
         <Card padding="large" style={styles.card} variant="muted">
-          <AppText variant="label">Phase 4 complete</AppText>
+          <AppText variant="label">Workspace ready</AppText>
           <AppText tone="muted">
-            The full dashboard and tab navigation arrive in Phase 12. Workspace
-            access is already protected by both this route guard and database
-            authorization.
+            Manage your flatmates and invitations while the full dashboard and
+            tab navigation are prepared for Phase 12.
           </AppText>
           <AppText tone="muted" variant="caption">
             Workspace: {activeWorkspace?.name ?? activeMembership?.workspace_id}
           </AppText>
+        </Card>
+
+        <Card padding="large" style={styles.card}>
+          <AppText variant="heading">Workspace management</AppText>
+          <Button
+            fullWidth
+            leadingIcon={icons.entities.members}
+            onPress={() => router.push("/members")}
+            variant="secondary"
+          >
+            Members
+          </Button>
+          {activeMembership?.role === "admin" ? (
+            <Button
+              fullWidth
+              leadingIcon={icons.actions.invite}
+              onPress={() => router.push("/invites")}
+              variant="secondary"
+            >
+              Invite members
+            </Button>
+          ) : null}
         </Card>
 
         {error ? (

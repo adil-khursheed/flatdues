@@ -398,38 +398,47 @@ Phase 5 verification notes:
 
 ### Feature: Members list
 
-- [ ] Show name, avatar/initial, role, and active/inactive status for each member.
-- [ ] Use Hugeicons for role/status indicators and member actions without replacing member avatars.
-- [ ] Avoid N+1 profile fetching.
-- [ ] Show a useful empty/single-member state.
-- [ ] Restrict management controls in the UI while relying on database authorization for enforcement.
+- [x] Show name, avatar/initial, role, and active/inactive status for each member.
+- [x] Use Hugeicons for role/status indicators and member actions without replacing member avatars.
+- [x] Avoid N+1 profile fetching.
+- [x] Show a useful empty/single-member state.
+- [x] Restrict management controls in the UI while relying on database authorization for enforcement.
 
 ### Feature: Invite management
 
-- [ ] Allow admins to generate an invitation with safe defaults.
-- [ ] Display and copy the invite code.
-- [ ] Share the invite through the native share sheet.
-- [ ] Present invite configuration and short invite actions through `AppBottomSheetModal` where an overlay is appropriate.
-- [ ] Show expiry and remaining-use information when configured.
-- [ ] Allow admins to revoke an active invitation.
-- [ ] Show loading, success, and friendly failure feedback.
+- [x] Allow admins to generate an invitation with safe defaults.
+- [x] Display and copy the invite code.
+- [x] Share the invite through the native share sheet.
+- [x] Present invite configuration and short invite actions through `AppBottomSheetModal` where an overlay is appropriate.
+- [x] Show expiry and remaining-use information when configured.
+- [x] Allow admins to revoke an active invitation.
+- [x] Show loading, success, and friendly failure feedback.
 
 ### Feature: Membership management
 
-- [ ] Allow an admin to mark another member inactive without deleting history.
-- [ ] Exclude inactive members from new-expense defaults.
-- [ ] Optionally support promotion to admin if it can be implemented safely within MVP scope.
-- [ ] Prevent unsafe demotion/deactivation of the last active admin.
-- [ ] Decide and enforce whether users can leave a workspace themselves.
-- [ ] Present role/status actions and deactivation confirmation through Gorhom bottom sheets.
+- [x] Allow an admin to mark another member inactive without deleting history.
+- [x] Exclude inactive members from new-expense defaults.
+- [x] Optionally support promotion to admin if it can be implemented safely within MVP scope.
+- [x] Prevent unsafe demotion/deactivation of the last active admin.
+- [x] Decide and enforce whether users can leave a workspace themselves.
+- [x] Present role/status actions and deactivation confirmation through Gorhom bottom sheets.
 
 ### Phase 6 verification
 
-- [ ] Acceptance Scenario 2 — Invite Members passes with five active members.
-- [ ] Acceptance Scenario 7 — Member Leaves preserves history and changes new-expense defaults.
-- [ ] Non-admin membership/invite mutations fail at the database layer.
-- [ ] TypeScript passes.
-- [ ] Lint passes.
+- [x] Acceptance Scenario 2 — Invite Members passes with five active members.
+- [x] Acceptance Scenario 7 — Member Leaves preserves history and changes new-expense defaults.
+- [x] Non-admin membership/invite mutations fail at the database layer.
+- [x] TypeScript passes.
+- [x] Lint passes.
+
+Phase 6 verification notes:
+
+- [x] `pnpm db:reset` replays the Phase 6 migration from zero and `pnpm db:test` passes 94 pgTAP assertions across the Phase 3 and Phase 6 suites.
+- [x] Phase 6 database coverage includes bounded/compatibility invites, revocation, five active members, role/status lifecycle, RPC-only writes, self-leave, last-admin protection, and cross-workspace rejection.
+- [x] Fresh local Supabase types are generated and `pnpm check` passes after the members/invitations implementation.
+- [x] Expo SDK 56 compatibility reports all dependencies up to date after the required patch alignment.
+- [x] Clean-cache Android, iOS, and web production exports complete with Expo Router `56.2.20`, including the protected members/invites routes and static web output.
+- [ ] Interactive Android/iOS verification of bottom-sheet transitions, clipboard/share behavior, pull-to-refresh, safe areas, large text, and self-leave routing remains a device quality gate.
 
 ## Phase 7 — Expense creation and equal splitting
 
