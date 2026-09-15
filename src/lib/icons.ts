@@ -29,6 +29,7 @@ import Mail01Icon from "@hugeicons/core-free-icons/Mail01Icon";
 import Money01Icon from "@hugeicons/core-free-icons/Money01Icon";
 import MoneyExchange01Icon from "@hugeicons/core-free-icons/MoneyExchange01Icon";
 import MoreHorizontalIcon from "@hugeicons/core-free-icons/MoreHorizontalIcon";
+import Note01Icon from "@hugeicons/core-free-icons/Note01Icon";
 import PackageIcon from "@hugeicons/core-free-icons/PackageIcon";
 import PlusSignIcon from "@hugeicons/core-free-icons/PlusSignIcon";
 import RefreshIcon from "@hugeicons/core-free-icons/RefreshIcon";
@@ -112,6 +113,7 @@ export const icons = {
     member: UserIcon,
     expense: Add01Icon,
     members: UserGroupIcon,
+    notes: Note01Icon,
     profile: UserIcon,
     workspace: Building03Icon,
   } satisfies IconMap,

@@ -62,6 +62,14 @@ export default function HomeRoute() {
           </AppText>
         </Card>
 
+        <Button
+          fullWidth
+          leadingIcon={icons.entities.expense}
+          onPress={() => router.push("/add-expense")}
+        >
+          Add Expense
+        </Button>
+
         <Card padding="large" style={styles.card}>
           <AppText variant="heading">Workspace management</AppText>
           <Button

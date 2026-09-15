@@ -444,54 +444,62 @@ Phase 6 verification notes:
 
 ### Feature: Money utilities
 
-- [ ] Implement a reusable ISO-currency formatter using workspace currency.
-- [ ] Implement safe conversion between user-entered decimal amounts and minor units/decimal strings.
-- [ ] Use consistent rounding and reject invalid precision/negative/zero values.
+- [x] Implement a reusable ISO-currency formatter using workspace currency.
+- [x] Implement safe conversion between user-entered decimal amounts and minor units/decimal strings.
+- [x] Use consistent rounding and reject invalid precision/negative/zero values.
 - [ ] Add unit tests for INR formatting, parsing, large values, and rounding edge cases.
 
 ### Feature: Date utilities
 
-- [ ] Represent `expense_date` as a local calendar date without UTC shifting.
-- [ ] Implement device-local Today labeling and date formatting.
+- [x] Represent `expense_date` as a local calendar date without UTC shifting.
+- [x] Implement device-local Today labeling and date formatting.
 - [ ] Add tests around timezone boundaries and month transitions.
 
 ### Feature: Add Expense form
 
-- [ ] Build fields for amount, title/description, category, date, payer, participants, and notes inside `KeyboardAwareForm` so the long form stays keyboard-height aware, safe-area protected, and scrollable.
-- [ ] Default date to the device's current local date.
-- [ ] Default payer to the authenticated member.
-- [ ] Default participants to all active workspace members.
-- [ ] Keep the common path fast: amount, description, Add Expense.
-- [ ] Allow any active member to be selected as payer.
-- [ ] Allow participant selection/deselection and technically allow payer outside participants.
-- [ ] Use Gorhom bottom sheets for category, date, payer, and participant selection instead of React Native modals.
-- [ ] Use Hugeicons for category choices and expense-form actions through the shared icon system.
-- [ ] Use Gorhom-integrated list, scroll, and text-input components inside selector sheets where required.
-- [ ] Prevent zero selected participants.
-- [ ] Validate required title, payer, amount, positive amount, and participants inline.
-- [ ] Show an approximate per-person share before saving.
-- [ ] Use categories: Groceries, Food, Utilities, Rent, Housekeeping, Maintenance, Household, Transport, and Other.
-- [ ] Keep category definitions centralized and future-configurable.
-- [ ] Submit through the atomic expense RPC and prevent duplicate submissions.
-- [ ] Refresh expense, balance, budget, dashboard, and activity data only after success.
-- [ ] Show friendly server validation errors without exposing raw Postgres text.
+- [x] Build fields for amount, title/description, category, date, payer, participants, and notes inside `KeyboardAwareForm` so the long form stays keyboard-height aware, safe-area protected, and scrollable.
+- [x] Default date to the device's current local date.
+- [x] Default payer to the authenticated member.
+- [x] Default participants to all active workspace members.
+- [x] Keep the common path fast: amount, description, Add Expense.
+- [x] Allow any active member to be selected as payer.
+- [x] Allow participant selection/deselection and technically allow payer outside participants.
+- [x] Use Gorhom bottom sheets for category, date, payer, and participant selection instead of React Native modals.
+- [x] Use Hugeicons for category choices and expense-form actions through the shared icon system.
+- [x] Use Gorhom-integrated list, scroll, and text-input components inside selector sheets where required.
+- [x] Prevent zero selected participants.
+- [x] Validate required title, payer, amount, positive amount, and participants inline.
+- [x] Show an approximate per-person share before saving.
+- [x] Use categories: Groceries, Food, Utilities, Rent, Housekeeping, Maintenance, Household, Transport, and Other.
+- [x] Keep category definitions centralized and future-configurable.
+- [x] Submit through the atomic expense RPC and prevent duplicate submissions.
+- [x] Refresh expense, balance, budget, dashboard, and activity data only after success.
+- [x] Show friendly server validation errors without exposing raw Postgres text.
 
 ### Feature: Prominent Add Expense action
 
-- [ ] Choose a clean prominent action compatible with the final tab/stack structure.
-- [ ] Make Add Expense reachable with one obvious interaction from Home.
-- [ ] Ensure the action is accessible and does not obscure content or navigation.
-- [ ] Use a Hugeicons Add/Plus icon with an accessible text label or accessible icon-only control label.
+- [x] Choose a clean prominent action compatible with the final tab/stack structure.
+- [x] Make Add Expense reachable with one obvious interaction from Home.
+- [x] Ensure the action is accessible and does not obscure content or navigation.
+- [x] Use a Hugeicons Add/Plus icon with an accessible text label or accessible icon-only control label.
 
 ### Phase 7 verification
 
-- [ ] Acceptance Scenario 3 — Equal Expense stores five exact ₹200 splits and produces the expected zero-sum balances.
-- [ ] Acceptance Scenario 4 — Selected Participants affects only the selected members.
-- [ ] Verify a non-even split (for example ₹100 / 3) stores deterministic exact splits totaling ₹100.
-- [ ] Verify payer-not-participant behavior.
-- [ ] Verify inactive members cannot be accidentally included in a new expense.
-- [ ] TypeScript passes.
-- [ ] Lint passes.
+- [x] Acceptance Scenario 3 — Equal Expense stores five exact ₹200 splits and produces the expected zero-sum balances.
+- [x] Acceptance Scenario 4 — Selected Participants affects only the selected members.
+- [x] Verify a non-even split (for example ₹100 / 3) stores deterministic exact splits totaling ₹100.
+- [x] Verify payer-not-participant behavior.
+- [x] Verify inactive members cannot be accidentally included in a new expense.
+- [x] TypeScript passes.
+- [x] Lint passes.
+
+Phase 7 verification notes:
+
+- [x] `pnpm check` passes with no lint warnings after the Phase 7 implementation.
+- [x] `pnpm db:test` passes 103 pgTAP assertions, including exact five-way splitting and balances, deterministic non-even rounding, inactive-member rejection, zero-sum balances, and payer-outside-participants behavior.
+- [x] Android and iOS production bundles complete; the web production export completes with the native-only Add Expense unavailable state.
+- [ ] Money/date application unit tests remain deliberately deferred to the Phase 16 `jest-expo` setup.
+- [ ] Interactive Android/iOS form, keyboard, sheet, accessibility, and acceptance-scenario walkthroughs remain part of the device quality gate on a host with an available emulator/device.
 
 ## Phase 8 — Expense history and details
 

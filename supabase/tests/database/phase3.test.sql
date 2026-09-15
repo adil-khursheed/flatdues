@@ -3,7 +3,7 @@ begin;
 create extension if not exists pgtap with schema extensions;
 set search_path = public, extensions;
 
-select plan(56);
+select plan(65);
 
 select has_table('public', 'profiles', 'profiles table exists');
 select has_table('public', 'workspaces', 'workspaces table exists');
@@ -187,6 +187,59 @@ select matches(
 );
 
 reset role;
+
+insert into auth.users (
+  id,
+  instance_id,
+  aud,
+  role,
+  email,
+  encrypted_password,
+  email_confirmed_at,
+  raw_app_meta_data,
+  raw_user_meta_data,
+  created_at,
+  updated_at
+)
+values
+  (
+    '00000000-0000-4000-8000-000000000006',
+    '00000000-0000-0000-0000-000000000000',
+    'authenticated',
+    'authenticated',
+    'member6@example.test',
+    '',
+    now(),
+    '{}'::jsonb,
+    '{"display_name":"Member Six"}'::jsonb,
+    now(),
+    now()
+  ),
+  (
+    '00000000-0000-4000-8000-000000000007',
+    '00000000-0000-0000-0000-000000000000',
+    'authenticated',
+    'authenticated',
+    'member7@example.test',
+    '',
+    now(),
+    '{}'::jsonb,
+    '{"display_name":"Member Seven"}'::jsonb,
+    now(),
+    now()
+  );
+
+insert into public.workspace_members (workspace_id, user_id)
+values
+  (
+    (select id from test_context where key = 'workspace_a'),
+    '00000000-0000-4000-8000-000000000006'
+  ),
+  (
+    (select id from test_context where key = 'workspace_a'),
+    '00000000-0000-4000-8000-000000000007'
+  );
+
 select set_config(
   'request.jwt.claims',
   '{"sub":"00000000-0000-4000-8000-000000000002","role":"authenticated"}',
@@ -365,7 +418,7 @@ set local role authenticated;
 
 select is(
   (select count(*)::integer from public.profiles),
-  3,
+  5,
   'profile reads include shared members but exclude unrelated users'
 );
 
@@ -376,6 +429,88 @@ select set_config(
   true
 );
 set local role authenticated;
+
+insert into test_context (key, id)
+select 'five_member_expense', id
+from public.create_expense(
+  (select id from test_context where key = 'workspace_a'),
+  'Five-way expense',
+  1000.00,
+  '00000000-0000-4000-8000-000000000001',
+  date '2026-08-26',
+  'groceries',
+  null,
+  array[
+    '00000000-0000-4000-8000-000000000001'::uuid,
+    '00000000-0000-4000-8000-000000000002'::uuid,
+    '00000000-0000-4000-8000-000000000004'::uuid,
+    '00000000-0000-4000-8000-000000000006'::uuid,
+    '00000000-0000-4000-8000-000000000007'::uuid
+  ]
+);
+
+select is(
+  (
+    select count(*)::integer
+    from public.expense_splits
+    where expense_id = (select id from test_context where key = 'five_member_expense')
+  ),
+  5,
+  'a five-member equal expense stores five split rows'
+);
+
+select is(
+  (
+    select count(*)::integer
+    from public.expense_splits
+    where expense_id = (select id from test_context where key = 'five_member_expense')
+      and share_amount = 200.00
+  ),
+  5,
+  'a 1000 expense across five members stores five exact 200 shares'
+);
+
+select is(
+  (
+    select sum(balance)
+    from public.get_workspace_balances(
+      (select id from test_context where key = 'workspace_a')
+    )
+  ),
+  0.00::numeric,
+  'the five-member expense keeps workspace balances zero-sum'
+);
+
+select is(
+  (
+    select balance
+    from public.get_workspace_balances(
+      (select id from test_context where key = 'workspace_a')
+    )
+    where user_id = '00000000-0000-4000-8000-000000000001'
+  ),
+  800.00::numeric,
+  'the five-way payer has the expected positive 800 balance'
+);
+
+select is(
+  (
+    select count(*)::integer
+    from public.get_workspace_balances(
+      (select id from test_context where key = 'workspace_a')
+    )
+    where user_id <> '00000000-0000-4000-8000-000000000001'
+      and balance = -200.00
+  ),
+  4,
+  'the other four five-way participants each have the expected negative 200 balance'
+);
+
+select is(
+  public.delete_expense((select id from test_context where key = 'five_member_expense')),
+  (select id from test_context where key = 'five_member_expense'),
+  'the five-member acceptance fixture is removed before aggregate assertions'
+);
 
 insert into test_context (key, id)
 select 'expense', id
@@ -423,6 +558,41 @@ select is(
   ),
   333.34::numeric,
   'the deterministic UUID ordering receives the rounding remainder'
+);
+
+insert into test_context (key, id)
+select 'payer_outside_expense', id
+from public.create_expense(
+  (select id from test_context where key = 'workspace_a'),
+  'Payer outside participants',
+  12.34,
+  '00000000-0000-4000-8000-000000000001',
+  date '2026-08-26',
+  'other',
+  null,
+  array['00000000-0000-4000-8000-000000000002'::uuid]
+);
+
+select ok(
+  (select id is not null from test_context where key = 'payer_outside_expense'),
+  'an active payer may be outside the participant set'
+);
+
+select is(
+  (
+    select share_amount
+    from public.expense_splits
+    where expense_id = (select id from test_context where key = 'payer_outside_expense')
+      and user_id = '00000000-0000-4000-8000-000000000002'
+  ),
+  12.34::numeric,
+  'payer-outside-participants assigns the full share only to the selected participant'
+);
+
+select is(
+  public.delete_expense((select id from test_context where key = 'payer_outside_expense')),
+  (select id from test_context where key = 'payer_outside_expense'),
+  'the payer-outside-participants fixture is removed before aggregate assertions'
 );
 
 select throws_ok(

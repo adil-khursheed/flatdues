@@ -255,3 +255,29 @@ Member mutations invalidate members, membership selection, balances, and dashboa
 keys. Invite creation/revocation invalidates the workspace invitation key. Realtime
 remains disabled; both management screens refetch on focus and support explicit
 pull-to-refresh.
+
+## Expense creation
+
+Phase 7 adds a native `/add-expense` stack route. The route renders a
+`KeyboardAwareForm`; category, date, payer, and participant selection use the shared
+Gorhom sheet abstraction. The native date sheet embeds the SDK 56
+`@expo/ui/community/datetime-picker` with inline presentation so Android does not
+open a second modal dialog. Web keeps a bundle-safe unavailable route for this
+native-only MVP flow.
+
+Expense form defaults come from the active-member query: the authenticated member
+pays, every active member participates, the date is the current local calendar date,
+and the category is `other`. Refetching members never overwrites an edited form.
+Submission reconciles payer and participant IDs against the latest active-member
+result before calling `create_expense`.
+
+Client money helpers parse plain decimal input into safe integer minor units and a
+canonical two-decimal value. They provide validation and an approximate preview
+only. PostgreSQL remains authoritative for exact split allocation and orders UUIDs
+when assigning rounding remainders. Expense dates cross the client/RPC boundary as
+`YYYY-MM-DD`; utilities construct picker values at local noon and never parse that
+storage value as a UTC timestamp.
+
+After the RPC confirms creation, the mutation awaits invalidation of expense,
+balance, budget, dashboard, and activity query families. No optimistic expense or
+split is inserted into the cache.

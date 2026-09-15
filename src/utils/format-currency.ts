@@ -3,10 +3,9 @@ type CurrencyAmount = number | string;
 export function formatCurrency(
   amount: CurrencyAmount,
   currency = "INR",
-  locale?: string,
+  locale?: string
 ) {
-  const numericAmount =
-    typeof amount === "number" ? amount : Number(amount);
+  const numericAmount = typeof amount === "number" ? amount : Number(amount);
 
   if (!Number.isFinite(numericAmount)) {
     return "—";
